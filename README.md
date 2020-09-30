@@ -17,6 +17,7 @@ Achtung: der Wert `core_passwd` muss die `md5sum` sein, das kann z.B. auf https:
 Alternativ kopiert man sich das MD5-Passwort aus der `settings.xml` vom Core.
 
 ```ini
+info_line=Credits %credits% - Uploaded %sessionupload% - Downloaded %sessiondownload% - Upload %uploadspeed% - Downloads %downloadspeed%
 collector_url=https://discord-bot.knastbruder.applejuicent.de/api/core-collector
 collector_token=TOKEN_VOM_DISCORD_BOT
 core_port=9851
@@ -24,6 +25,18 @@ core_host=http://192.168.155.10
 core_passwd=
 interval=60000
 ```
+
+### Info Line
+Es sind folgende Platzhalter möglich
+
+- `%coreCredits%`
+- `%coreSessionUpload%`
+- `%coreSessionDownload%`
+- `%coreUploadSpeed%`
+- `%coreDownloadSpeed%`
+- `%networkUser%`
+- `%networkFiles%`
+- `%networkFileSize%`
 
 ### Collector URL
 

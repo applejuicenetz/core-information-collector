@@ -26,15 +26,18 @@ import org.xml.sax.InputSource;
 
 public class Collector extends TimerTask implements ActionListener {
     private static final String APP_NAME = "appleJuice Core Information Collector";
-    private static final String INFO_LINE = "Credits %s - Sessionupload %s - sessiondownload %s - uploadspeed %s/s - downloadspeed %s/s";
 
     private TrayIcon trayIcon;
 
-    private long credits;
-    private long sessionupload;
-    private long sessiondownload;
-    private long uploadspeed;
-    private long downloadspeed;
+    private long coreCredits;
+    private long coreSessionUpload;
+    private long coreSessionDownload;
+    private long coreUploadSpeed;
+    private long coreDownloadSpeed;
+
+    private long networkUser;
+    private long networkFiles;
+    private long networkFileSize;
 
     private int errorCountGet = 0;
 
@@ -121,14 +124,17 @@ public class Collector extends TimerTask implements ActionListener {
     }
 
     private void updateTooltip() {
-        String Info = String.format(
-                INFO_LINE,
-                readableFileSize(credits),
-                readableFileSize(sessionupload),
-                readableFileSize(sessiondownload),
-                readableFileSize(uploadspeed),
-                readableFileSize(downloadspeed)
-        );
+        String Info = presets.getInfoLine();
+
+        Info = Info.replace("%coreCredits%", readableFileSize(coreCredits));
+        Info = Info.replace("%coreSessionUpload%", readableFileSize(coreSessionUpload));
+        Info = Info.replace("%coreSessionDownload%", readableFileSize(coreSessionDownload));
+        Info = Info.replace("%coreUploadSpeed%", readableFileSize(coreUploadSpeed) + "/s");
+        Info = Info.replace("%coreDownloadSpeed%", readableFileSize(coreDownloadSpeed) + "/s");
+
+        Info = Info.replace("%networkUser%", readableFileSize(networkUser));
+        Info = Info.replace("%networkFiles%", readableFileSize(networkFiles));
+        Info = Info.replace("%networkFileSize%", readableFileSize(networkFileSize));
 
         System.out.println(Info);
 
@@ -143,12 +149,17 @@ public class Collector extends TimerTask implements ActionListener {
         XPathFactory xpf = XPathFactory.newInstance();
         XPath xpath = xpf.newXPath();
         Element coreInfo = (Element) xpath.evaluate("/applejuice/information", document, XPathConstants.NODE);
+        Element networkInfo = (Element) xpath.evaluate("/applejuice/networkinfo", document, XPathConstants.NODE);
 
-        credits = Long.parseLong(coreInfo.getAttribute("credits"));
-        sessionupload = Long.parseLong(coreInfo.getAttribute("sessionupload"));
-        sessiondownload = Long.parseLong(coreInfo.getAttribute("sessiondownload"));
-        uploadspeed = Long.parseLong(coreInfo.getAttribute("uploadspeed"));
-        downloadspeed = Long.parseLong(coreInfo.getAttribute("downloadspeed"));
+        coreCredits = Long.parseLong(coreInfo.getAttribute("credits"));
+        coreSessionUpload = Long.parseLong(coreInfo.getAttribute("sessionupload"));
+        coreSessionDownload = Long.parseLong(coreInfo.getAttribute("sessiondownload"));
+        coreUploadSpeed = Long.parseLong(coreInfo.getAttribute("uploadspeed"));
+        coreDownloadSpeed = Long.parseLong(coreInfo.getAttribute("downloadspeed"));
+
+        networkUser = Long.parseLong(networkInfo.getAttribute("users"));
+        networkFiles = Long.parseLong(networkInfo.getAttribute("files"));
+        networkFileSize = (long) Float.parseFloat(networkInfo.getAttribute("filesize"));
 
         DOMImplementationLS lsImpl = (DOMImplementationLS) coreInfo.getOwnerDocument().getImplementation().getFeature("LS", "3.0");
         LSSerializer serializer = lsImpl.createLSSerializer();

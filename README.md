@@ -1,6 +1,6 @@
 # appleJuice Core Information Collector
 
-Dieses kleine Tool holt die Informationen von deinem Core (Credits, Upload, Download usw.) und leitet diese an eine definierte URL weiter.
+Dieses kleine Tool holt die Informationen von deinem Core (siehe unten `Platzhalter`) und leitet diese aufbereitet an eine definierte URL weiter.
 
 Diese Informationen sind außerdem als Tooltip mittels des `info_line` Parameters konfigurierbar und werden ebenfalls als `stdOut` ausgegeben.
 
@@ -12,52 +12,34 @@ Sofern der Core auf dem gleichen Gerät läuft und kein Passwort hat, funktionie
 
 Hat der Core ein Passwort und/oder läuft auf einem anderen Gerät, muss die ini Datei entsprechend angepasst werden.
 
-**Achtung**: der Wert `core_passwd` muss die `md5sum` sein, das kann z.B. auf https://www.md5hashgenerator.com umgewandelt werden.
+| Konfiguration | Wert         | Erklärung                  | Beispiel                                                                          |
+|---------------|--------------|----------------------------|-----------------------------------------------------------------------------------|
+| info_line     | `Text`       | Text mit Platzhaltern      | `Credits %coreCredits% - Uploaded %coreSessionUpload% - Upload %coreUploadSpeed%` |
+| forward_url   | `valid url`  | API URL für `forward_line` | `https://discord-bot.knastbruder.applejuicent.de/api/core-collector` oder `off`   |
+| forward_line  | `Text`       | Text mit Platzhaltern      | `Credits %coreCredits% - Uploaded %coreSessionUpload% - Upload %coreUploadSpeed%` |
+| forward_token | `Text`       | Auth Token für die API URL | `d9c1f872-5f48-42af-bd0d-601f2f05352a` (bekommst du vom Discord Bot)              |
+| interval      | `60000`      | Millisekunden              | sollte nicht niedriger als `5000` (5 Sekunden) stehen (Core überlastung möglich)  |
+| core_port     | `9851`       | Core XML Port              | Der XML API Port des Core                                                         |
+| core_host     | `valid host` | IP des Core mit Protokoll  | Bei den meisten `http://127.0.0.1`                                                |
+| core_passwd   | `md5sum`     | MD5 Passwort vom Core      | `de305845b091d971732a123977e2d816` kann aus der `settings.xml` entnommen werden   |
 
-Alternativ kopiert man sich das MD5-Passwort aus der `settings.xml` vom Core.
 
-```ini
-info_line=Credits %coreCredits% - Uploaded %coreSessionUpload% - Downloaded %coreSessionDownload% - Upload %coreUploadSpeed% - Download %coreDownloadSpeed%
-forward_line=Core `%coreVersion%` - Credits `%coreCredits%` - Uploaded `%coreSessionUpload%` - Downloaded `%coreSessionDownload% - Upload `%coreUploadSpeed%` - Download `%coreDownloadSpeed%`
-forward_url=https://discord-bot.knastbruder.applejuicent.de/api/core-collector
-forward_token=TOKEN_VOM_DISCORD_BOT
-interval=60000
-core_port=9851
-core_host=http://192.168.155.10
-core_passwd=
-```
-**Achtung**: der `interval` sind Millisekunden, dieser sollte nicht niedriger als 5000 (5 Sekunden) stehen, da sonst der Core überlastet.
+## Platzhalter
 
-### ToolTip
-Es sind folgende Platzhalter möglich
+Es sind folgende Platzhalter in `info_line` und `forward_line` möglich:
 
-| Platzhalter             | Beispiel     |
-|-------------------------|--------------|
-| `%coreVersion%`         | 0.31.149.111 |
-| `%coreSystem%`          | Windows      |
-| `%coreCredits%`         | 15,5GB       |
-| `%coreSessionUpload%`   | 31GB         |
-| `%coreSessionDownload%` | 2GB          |
-| `%coreUploadSpeed%`     | 1,2MB/s      |
-| `%coreDownloadSpeed%`   | 60kb/s       |
-| `%coreUploads%`         | 12           |
-| `%coreDownloads%`       | 8            |
-| `%coreDownloadsReady%`  | 3            |
-| `%networkUser%`         | 700          |
-| `%networkFiles%`        | 3.182.468    |
-| `%networkFileSize%`     | 798TB        |
-
-### Collector URL
-
-Als standard ist unser [Discord Bot](https://github.com/applejuicenet/discord-bot) hinterlegt.
-
-Wird der Wert geleert, werden keine Daten übermittelt und das Programm zeigt lediglich im SystemTray die aktuellen Core Informationen als Tooltip ;) 
-
-### Collector Token
-
-Das token bekommst du vom `appleJuiceNET` Bot als private Nachricht.
-
-Dafür musst du lediglich `!aj` in den Channel Tippen wo der Bot anwesend ist.
-
-Bei Ersteinrichtung hat das Token lediglich eine gültigkeit von 15 Minuten.
-Sobald die ersten Daten für das Token empfangen wurden, bleibt das Token dauerhaft gültig.
+| Platzhalter             | Beispiel     | Wo        |
+|-------------------------|--------------|-----------|
+| `%coreVersion%`         | 0.31.149.111 | überall   |
+| `%coreSystem%`          | Windows      | überall   |
+| `%coreCredits%`         | 15,5GB       | überall   |
+| `%coreSessionUpload%`   | 31GB         | überall   |
+| `%coreSessionDownload%` | 2GB          | überall   |
+| `%coreUploadSpeed%`     | 1,2MB/s      | überall   |
+| `%coreDownloadSpeed%`   | 60kb/s       | überall   |
+| `%coreUploads%`         | 12           | überall   |
+| `%coreDownloads%`       | 8            | überall   |
+| `%coreDownloadsReady%`  | 3            | überall   |
+| `%networkUser%`         | 700          | info_line |
+| `%networkFiles%`        | 3.182.468    | info_line |
+| `%networkFileSize%`     | 798TB        | info_line |

@@ -64,21 +64,8 @@ public class Collector extends TimerTask implements ActionListener {
 
     public Collector() {
         presets = new Presets();
-        if (SystemTray.isSupported()) {
-            SystemTray systemTray = SystemTray.getSystemTray();
 
-            PopupMenu menu = this.createMenu();
-
-            try {
-                BufferedImage trayIconImage = ImageIO.read(getClass().getResource("icon.png"));
-                int trayIconWidth = new TrayIcon(trayIconImage).getSize().width;
-                trayIcon = new TrayIcon(trayIconImage.getScaledInstance(trayIconWidth, -1, Image.SCALE_SMOOTH), "Collector", menu);
-
-                systemTray.add(trayIcon);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-            }
-        }
+        configureSystemTray();
 
         try {
             getCoreVersion();
@@ -117,14 +104,41 @@ public class Collector extends TimerTask implements ActionListener {
     }
 
     public void run() {
+        getAppleJuiceInformation();
+
+        updateInfoLine();
+
+        if (!presets.getForwardUrl().equals("off")) {
+            try {
+                forward();
+                errorCountPost = 0;
+            } catch (Exception e) {
+                e.printStackTrace();
+                errorCountPost++;
+            }
+
+            if (errorCountPost > 30) {
+                System.err.println("to many errors");
+                JOptionPane.showMessageDialog(null, "Konnte die API URL zu oft nicht erreichen, keine Internetverbindung?", APP_NAME, JOptionPane.ERROR_MESSAGE, appIcon);
+                System.exit(-1);
+            }
+        }
+    }
+
+    private void getAppleJuiceInformation() {
         String payload;
 
         String url = String.format("%s:%s/xml/modified.xml?password=%s", presets.getCoreHost(), presets.getCorePort(), presets.getCorePassword());
 
+        if (errorCountGet > 10) {
+            System.err.println("to many errors");
+            JOptionPane.showMessageDialog(null, "Core konnte zu oft nicht erreicht werden, Daten korrekt?", APP_NAME, JOptionPane.ERROR_MESSAGE, appIcon);
+            System.exit(-1);
+        }
+
         try {
             payload = getHTTPResource(url);
             errorCountGet = 0;
-
         } catch (Exception e) {
             System.out.println(e.toString());
             errorCountGet++;
@@ -135,30 +149,6 @@ public class Collector extends TimerTask implements ActionListener {
             handleAppleJuiceInformation(payload);
         } catch (Exception e) {
             e.printStackTrace();
-        }
-
-        updateInfoLine();
-
-        if (errorCountGet > 10) {
-            System.err.println("to many errors");
-            JOptionPane.showMessageDialog(null, "Core konnte zu oft nicht erreicht werden, Daten korrekt?", APP_NAME, JOptionPane.ERROR_MESSAGE, appIcon);
-            System.exit(-1);
-        }
-
-        if (!presets.getForwardUrl().isEmpty()) {
-            try {
-                forward();
-                errorCountPost = 0;
-            } catch (Exception e) {
-                e.printStackTrace();
-                errorCountPost++;
-            }
-
-            if (errorCountPost > 60) {
-                System.err.println("to many errors");
-                JOptionPane.showMessageDialog(null, "Konnte den Discord Bot zu oft nicht erreichen, keine Internetverbindung?", APP_NAME, JOptionPane.ERROR_MESSAGE, appIcon);
-                System.exit(-1);
-            }
         }
     }
 
@@ -260,6 +250,24 @@ public class Collector extends TimerTask implements ActionListener {
         }
     }
 
+    private void configureSystemTray() {
+        if (SystemTray.isSupported()) {
+            SystemTray systemTray = SystemTray.getSystemTray();
+
+            PopupMenu menu = this.createMenu();
+
+            try {
+                BufferedImage trayIconImage = ImageIO.read(getClass().getResource("icon.png"));
+                int trayIconWidth = new TrayIcon(trayIconImage).getSize().width;
+                trayIcon = new TrayIcon(trayIconImage.getScaledInstance(trayIconWidth, -1, Image.SCALE_SMOOTH), "Collector", menu);
+
+                systemTray.add(trayIcon);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void actionPerformed(ActionEvent ev) {
         switch (ev.getActionCommand()) {
             case "about":
@@ -336,7 +344,7 @@ public class Collector extends TimerTask implements ActionListener {
         try {
             return Collector.class.getPackage().getImplementationVersion();
         } catch (Exception e) {
-            return "TEST";
+            return "SNAPSHOT";
         }
     }
 }

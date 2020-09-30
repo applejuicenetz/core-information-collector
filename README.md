@@ -18,25 +18,34 @@ Alternativ kopiert man sich das MD5-Passwort aus der `settings.xml` vom Core.
 
 ```ini
 info_line=Credits %coreCredits% - Uploaded %coreSessionUpload% - Downloaded %coreSessionDownload% - Upload %coreUploadSpeed% - Download %coreDownloadSpeed%
-collector_url=https://discord-bot.knastbruder.applejuicent.de/api/core-collector
-collector_token=TOKEN_VOM_DISCORD_BOT
+forward_line=Core `%coreVersion%` - Credits `%coreCredits%` - Uploaded `%coreSessionUpload%` - Downloaded `%coreSessionDownload% - Upload `%coreUploadSpeed%` - Download `%coreDownloadSpeed%`
+forward_url=https://discord-bot.knastbruder.applejuicent.de/api/core-collector
+forward_token=TOKEN_VOM_DISCORD_BOT
+interval=60000
 core_port=9851
 core_host=http://192.168.155.10
 core_passwd=
-interval=60000
 ```
+**Achtung**: der `interval` sind Millisekunden, dieser sollte nicht niedriger als 5000 (5 Sekunden) stehen, da sonst der Core überlastet.
 
-### Info Line
+### ToolTip
 Es sind folgende Platzhalter möglich
 
-- `%coreCredits%`
-- `%coreSessionUpload%`
-- `%coreSessionDownload%`
-- `%coreUploadSpeed%`
-- `%coreDownloadSpeed%`
-- `%networkUser%`
-- `%networkFiles%`
-- `%networkFileSize%`
+| Platzhalter             | Beispiel     |
+|-------------------------|--------------|
+| `%coreVersion%`         | 0.31.149.111 |
+| `%coreSystem%`          | Windows      |
+| `%coreCredits%`         | 15,5GB       |
+| `%coreSessionUpload%`   | 31GB         |
+| `%coreSessionDownload%` | 2GB          |
+| `%coreUploadSpeed%`     | 1,2MB/s      |
+| `%coreDownloadSpeed%`   | 60kb/s       |
+| `%coreUploads%`         | 12           |
+| `%coreDownloads%`       | 8            |
+| `%coreDownloadsReady%`  | 3            |
+| `%networkUser%`         | 700          |
+| `%networkFiles%`        | 3.182.468    |
+| `%networkFileSize%`     | 798TB        |
 
 ### Collector URL
 

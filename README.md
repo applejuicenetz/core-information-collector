@@ -2,7 +2,7 @@
 
 Dieses kleine Tool holt die Informationen von deinem Core (Credits, Upload, Download usw.) und leitet diese an eine definierte URL weiter.
 
-Außerdem werden ein Teil der Informationen als `stdOut` ausgegeben.
+Diese Informationen sind außerdem als Tooltip mittels des `info_line` Parameters konfigurierbar und werden ebenfalls als `stdOut` ausgegeben.
 
 ## Konfiguration
 
@@ -12,12 +12,12 @@ Sofern der Core auf dem gleichen Gerät läuft und kein Passwort hat, funktionie
 
 Hat der Core ein Passwort und/oder läuft auf einem anderen Gerät, muss die ini Datei entsprechend angepasst werden.
 
-Achtung: der Wert `core_passwd` muss die `md5sum` sein, das kann z.B. auf https://www.md5hashgenerator.com umgewandelt werden.
+**Achtung**: der Wert `core_passwd` muss die `md5sum` sein, das kann z.B. auf https://www.md5hashgenerator.com umgewandelt werden.
 
 Alternativ kopiert man sich das MD5-Passwort aus der `settings.xml` vom Core.
 
 ```ini
-info_line=Credits %credits% - Uploaded %sessionupload% - Downloaded %sessiondownload% - Upload %uploadspeed% - Downloads %downloadspeed%
+info_line=Credits %coreCredits% - Uploaded %coreSessionUpload% - Downloaded %coreSessionDownload% - Upload %coreUploadSpeed% - Download %coreDownloadSpeed%
 collector_url=https://discord-bot.knastbruder.applejuicent.de/api/core-collector
 collector_token=TOKEN_VOM_DISCORD_BOT
 core_port=9851

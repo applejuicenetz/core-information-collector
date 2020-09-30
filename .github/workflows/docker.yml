@@ -2,7 +2,6 @@ name: 'docker'
 
 on:
     workflow_dispatch:
-    push:
     schedule:
         -   cron:  '0 7 * * MON'
 

@@ -6,6 +6,7 @@ class Presets {
 
     private Properties config;
 
+    private static final String DEFAULT_INFOLINE = "Credits %coreCredits% - Uploaded %coreSessionUpload% - Downloaded %coreSessionDownload% - Upload %coreUploadSpeed% - Download %coreDownloadSpeed%";
     private static final String DEFAULT_COLLECTOR = "https://discord-bot.knastbruder.applejuicent.de/api/core-collector";
     private static final String DEFAULT_COLLECTOR_TOKEN = "";
     private static final String DEFAULT_INTERVAL = "60000";
@@ -20,6 +21,7 @@ class Presets {
         if (file.exists()) {
             loadPresets();
         } else {
+            config.setProperty("info_line", DEFAULT_INFOLINE);
             config.setProperty("collector_url", DEFAULT_COLLECTOR);
             config.setProperty("collector_token", DEFAULT_COLLECTOR_TOKEN);
             config.setProperty("interval", DEFAULT_INTERVAL);
@@ -29,6 +31,10 @@ class Presets {
 
             savePresets();
         }
+    }
+
+    public String getInfoLine() {
+        return config.getProperty("info_line", DEFAULT_INFOLINE);
     }
 
     public String getCollector() {

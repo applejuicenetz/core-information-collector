@@ -7,6 +7,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -20,8 +22,6 @@ import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.ls.DOMImplementationLS;
-import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.InputSource;
 
 public class Collector extends TimerTask implements ActionListener {
@@ -29,15 +29,28 @@ public class Collector extends TimerTask implements ActionListener {
 
     private TrayIcon trayIcon;
 
+    private final ImageIcon appIcon = new ImageIcon(getClass().getResource("icon.png"));
+
+    private final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+
+    private final XPathFactory xpf = XPathFactory.newInstance();
+
+    private String coreVersion;
+    private String coreSystem;
+
     private long coreCredits;
     private long coreSessionUpload;
     private long coreSessionDownload;
     private long coreUploadSpeed;
     private long coreDownloadSpeed;
 
+    private long coreUploads;
+    private long coreDownloads;
+    private long coreDownloadsReady;
+
     private long networkUser;
     private long networkFiles;
-    private long networkFileSize;
+    private double networkFileSize;
 
     private int errorCountGet = 0;
 
@@ -46,28 +59,31 @@ public class Collector extends TimerTask implements ActionListener {
     public Presets presets;
 
     public static void main(String[] args) {
-        if (SystemTray.isSupported()) {
-            new Collector();
-        } else {
-            JOptionPane.showMessageDialog(null, "SystemTray not supported", APP_NAME, JOptionPane.ERROR_MESSAGE);
-        }
+        new Collector();
     }
 
     public Collector() {
-        SystemTray systemTray = SystemTray.getSystemTray();
-
         presets = new Presets();
+        if (SystemTray.isSupported()) {
+            SystemTray systemTray = SystemTray.getSystemTray();
 
-        PopupMenu menu = this.createMenu();
+            PopupMenu menu = this.createMenu();
+
+            try {
+                BufferedImage trayIconImage = ImageIO.read(getClass().getResource("icon.png"));
+                int trayIconWidth = new TrayIcon(trayIconImage).getSize().width;
+                trayIcon = new TrayIcon(trayIconImage.getScaledInstance(trayIconWidth, -1, Image.SCALE_SMOOTH), "Collector", menu);
+
+                systemTray.add(trayIcon);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
 
         try {
-            BufferedImage trayIconImage = ImageIO.read(getClass().getResource("icon.png"));
-            int trayIconWidth = new TrayIcon(trayIconImage).getSize().width;
-            trayIcon = new TrayIcon(trayIconImage.getScaledInstance(trayIconWidth, -1, Image.SCALE_SMOOTH), "Collector", menu);
-
-            systemTray.add(trayIcon);
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            getCoreVersion();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         run();
@@ -76,10 +92,34 @@ public class Collector extends TimerTask implements ActionListener {
         timer.schedule(this, 1000, presets.getInterval());
     }
 
+    public void getCoreVersion() throws Exception {
+        String url = String.format("%s:%s/xml/information.xml?password=%s", presets.getCoreHost(), presets.getCorePort(), presets.getCorePassword());
+
+        String payload;
+
+        try {
+            payload = getHTTPResource(url);
+
+        } catch (Exception e) {
+            System.out.println(e.toString());
+            return;
+        }
+
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document document = db.parse(new InputSource(new StringReader(payload)));
+
+        XPath xpath = xpf.newXPath();
+        Element generalinformationVersion = (Element) xpath.evaluate("/applejuice/generalinformation/version", document, XPathConstants.NODE);
+        Element generalinformationSystem = (Element) xpath.evaluate("/applejuice/generalinformation/system", document, XPathConstants.NODE);
+
+        coreVersion = generalinformationVersion.getFirstChild().getNodeValue();
+        coreSystem = generalinformationSystem.getFirstChild().getNodeValue();
+    }
+
     public void run() {
         String payload;
 
-        String url = String.format("%s:%s/xml/modified.xml?filter=informations&password=%s", presets.getCoreHost(), presets.getCorePort(), presets.getCorePassword());
+        String url = String.format("%s:%s/xml/modified.xml?password=%s", presets.getCoreHost(), presets.getCorePort(), presets.getCorePassword());
 
         try {
             payload = getHTTPResource(url);
@@ -92,22 +132,22 @@ public class Collector extends TimerTask implements ActionListener {
         }
 
         try {
-            payload = handleAppleJuiceInformation(payload);
+            handleAppleJuiceInformation(payload);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        updateTooltip();
+        updateInfoLine();
 
         if (errorCountGet > 10) {
             System.err.println("to many errors");
-            JOptionPane.showMessageDialog(null, "Core konnte zu oft nicht erreicht werden, Daten korrekt?", APP_NAME, JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Core konnte zu oft nicht erreicht werden, Daten korrekt?", APP_NAME, JOptionPane.ERROR_MESSAGE, appIcon);
             System.exit(-1);
         }
 
-        if ("" != presets.getCollector()) {
+        if (!presets.getForwardUrl().isEmpty()) {
             try {
-                post(payload);
+                forward();
                 errorCountPost = 0;
             } catch (Exception e) {
                 e.printStackTrace();
@@ -116,40 +156,25 @@ public class Collector extends TimerTask implements ActionListener {
 
             if (errorCountPost > 60) {
                 System.err.println("to many errors");
-                JOptionPane.showMessageDialog(null, "Konnte den Discord Bot zu oft nicht erreichen, keine Internetverbindung?", APP_NAME, JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Konnte den Discord Bot zu oft nicht erreichen, keine Internetverbindung?", APP_NAME, JOptionPane.ERROR_MESSAGE, appIcon);
                 System.exit(-1);
             }
         }
-
     }
 
-    private void updateTooltip() {
-        String Info = presets.getInfoLine();
-
-        Info = Info.replace("%coreCredits%", readableFileSize(coreCredits));
-        Info = Info.replace("%coreSessionUpload%", readableFileSize(coreSessionUpload));
-        Info = Info.replace("%coreSessionDownload%", readableFileSize(coreSessionDownload));
-        Info = Info.replace("%coreUploadSpeed%", readableFileSize(coreUploadSpeed) + "/s");
-        Info = Info.replace("%coreDownloadSpeed%", readableFileSize(coreDownloadSpeed) + "/s");
-
-        Info = Info.replace("%networkUser%", readableFileSize(networkUser));
-        Info = Info.replace("%networkFiles%", readableFileSize(networkFiles));
-        Info = Info.replace("%networkFileSize%", readableFileSize(networkFileSize));
-
-        System.out.println(Info);
-
-        trayIcon.setToolTip(Info);
-    }
-
-    private String handleAppleJuiceInformation(String payload) throws Exception {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    private void handleAppleJuiceInformation(String payload) throws Exception {
         DocumentBuilder db = dbf.newDocumentBuilder();
         Document document = db.parse(new InputSource(new StringReader(payload)));
 
-        XPathFactory xpf = XPathFactory.newInstance();
         XPath xpath = xpf.newXPath();
         Element coreInfo = (Element) xpath.evaluate("/applejuice/information", document, XPathConstants.NODE);
         Element networkInfo = (Element) xpath.evaluate("/applejuice/networkinfo", document, XPathConstants.NODE);
+
+        double coreDownloadsReadyCount = (double) xpath.evaluate("count(/applejuice/download[@ready=0])", document, XPathConstants.NUMBER);
+        coreDownloadsReady = Double.valueOf(coreDownloadsReadyCount).longValue();
+
+        coreUploads = document.getElementsByTagName("upload").getLength();
+        coreDownloads = document.getElementsByTagName("download").getLength();
 
         coreCredits = Long.parseLong(coreInfo.getAttribute("credits"));
         coreSessionUpload = Long.parseLong(coreInfo.getAttribute("sessionupload"));
@@ -159,14 +184,8 @@ public class Collector extends TimerTask implements ActionListener {
 
         networkUser = Long.parseLong(networkInfo.getAttribute("users"));
         networkFiles = Long.parseLong(networkInfo.getAttribute("files"));
-        networkFileSize = (long) Float.parseFloat(networkInfo.getAttribute("filesize"));
 
-        DOMImplementationLS lsImpl = (DOMImplementationLS) coreInfo.getOwnerDocument().getImplementation().getFeature("LS", "3.0");
-        LSSerializer serializer = lsImpl.createLSSerializer();
-        serializer.getDomConfig().setParameter("xml-declaration", false); //by default its true, so set it to false to get String without xml-declaration
-        payload = serializer.writeToString(coreInfo);
-
-        return payload;
+        networkFileSize = Double.parseDouble(networkInfo.getAttribute("filesize"));
     }
 
     public static String getHTTPResource(String urlToRead) throws Exception {
@@ -183,26 +202,73 @@ public class Collector extends TimerTask implements ActionListener {
         return result.toString();
     }
 
-    public void post(String payload) throws Exception {
+    public void forward() throws Exception {
         String charset = "UTF-8";
-        URLConnection connection = new URL(presets.getCollector()).openConnection();
+        URLConnection connection = new URL(presets.getForwardUrl()).openConnection();
         connection.setDoOutput(true); // Triggers POST.
         connection.setRequestProperty("Accept-Charset", charset);
-        connection.setRequestProperty("Authorization", "Token " + presets.getCollectorToken());
-        connection.setRequestProperty("Content-Type", "application/xml;charset=" + charset);
+        if (!presets.getForwardToken().isEmpty()) {
+            connection.setRequestProperty("Authorization", "Token " + presets.getForwardToken());
+
+        }
+        connection.setRequestProperty("Content-Type", "text/plain;charset=" + charset);
 
         try (OutputStream output = connection.getOutputStream()) {
-            output.write(payload.getBytes(charset));
+            output.write(getFormattedForwardLine().getBytes(charset));
         }
 
         InputStream response = connection.getInputStream();
+    }
 
-        System.out.println(response.toString());
+    private String getFormattedForwardLine() {
+        return presets.getForwardLine()
+                .replace("%coreVersion%", coreVersion)
+                .replace("%coreSystem%", coreSystem)
+                .replace("%coreCredits%", readableFileSize(coreCredits))
+                .replace("%coreSessionUpload%", readableFileSize(coreSessionUpload))
+                .replace("%coreSessionDownload%", readableFileSize(coreSessionDownload))
+                .replace("%coreUploadSpeed%", readableFileSize(coreUploadSpeed) + "/s")
+                .replace("%coreDownloadSpeed%", readableFileSize(coreDownloadSpeed) + "/s")
+
+                .replace("%coreUploads%", Long.toString(coreUploads))
+                .replace("%coreDownloads%", Long.toString(coreDownloads))
+                .replace("%coreDownloadsReady%", Long.toString(coreDownloadsReady));
+    }
+
+    private void updateInfoLine() {
+        String Info = presets.getInfoLine()
+                .replace("%coreVersion%", coreVersion)
+                .replace("%coreSystem%", coreSystem)
+                .replace("%coreCredits%", readableFileSize(coreCredits))
+                .replace("%coreSessionUpload%", readableFileSize(coreSessionUpload))
+                .replace("%coreSessionDownload%", readableFileSize(coreSessionDownload))
+                .replace("%coreUploadSpeed%", readableFileSize(coreUploadSpeed) + "/s")
+                .replace("%coreDownloadSpeed%", readableFileSize(coreDownloadSpeed) + "/s")
+
+                .replace("%coreUploads%", Long.toString(coreUploads))
+                .replace("%coreDownloads%", Long.toString(coreDownloads))
+                .replace("%coreDownloadsReady%", Long.toString(coreDownloadsReady))
+
+                .replace("%networkUser%", Long.toString(networkUser))
+                .replace("%networkFiles%", NumberFormat.getNumberInstance(Locale.GERMAN).format(networkFiles))
+                .replace("%networkFileSize%", readableNetworkShareSize(networkFileSize, 0));
+
+        System.out.println(Info);
+
+        if (SystemTray.isSupported()) {
+            trayIcon.setToolTip(Info);
+        }
     }
 
     public void actionPerformed(ActionEvent ev) {
-        if (ev.getActionCommand().equals("quit")) {
-            System.exit(0);
+        switch (ev.getActionCommand()) {
+            case "about":
+                JOptionPane.showMessageDialog(null, "Version " + getVersion(), APP_NAME, JOptionPane.INFORMATION_MESSAGE, appIcon);
+                break;
+
+            case "quit":
+                System.exit(0);
+                break;
         }
     }
 
@@ -213,8 +279,49 @@ public class Collector extends TimerTask implements ActionListener {
         return new DecimalFormat("#,##0.#").format(size / Math.pow(1024, digitGroups)) + units[digitGroups];
     }
 
+    public String readableNetworkShareSize(double share, long faktor) {
+
+        if (share == 0) {
+            return "0,00 MB";
+        }
+
+        if (faktor == 0) { // selbst entscheiden
+            if (share / 1024 < 1024) {
+                faktor = 1024;
+            } else if (share / 1048576 < 1024) {
+                faktor = 1048576;
+            } else {
+                faktor = 1;
+            }
+        }
+
+        share = share / faktor;
+        String result = Double.toString(share);
+
+        if (result.indexOf(".") + 3 < result.length()) {
+            result = result.substring(0, result.indexOf(".") + 3);
+        }
+
+        result = result.replace('.', ',');
+        if (faktor == 1) {
+            result += "MB";
+        } else if (faktor == 1024) {
+            result += "GB";
+        } else if (faktor == 1048576) {
+            result += "TB";
+        } else {
+            result += "??";
+        }
+
+        return result;
+    }
+
     private PopupMenu createMenu() {
-        PopupMenu menu = new PopupMenu("appleJuice Core Collector " + getVersion());
+        PopupMenu menu = new PopupMenu(APP_NAME + getVersion());
+
+        MenuItem menuAbout = new MenuItem("About");
+        menuAbout.setActionCommand("about");
+        menu.add(menuAbout);
 
         MenuItem menuExit = new MenuItem("Quit");
         menuExit.setActionCommand("quit");

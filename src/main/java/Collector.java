@@ -20,6 +20,8 @@ import javax.xml.xpath.XPathFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.ls.DOMImplementationLS;
+import org.w3c.dom.ls.LSSerializer;
 import org.xml.sax.InputSource;
 
 public class Collector extends TimerTask implements ActionListener {
@@ -78,18 +80,18 @@ public class Collector extends TimerTask implements ActionListener {
 
         try {
             payload = getHTTPResource(url);
+            errorCountGet = 0;
 
         } catch (Exception e) {
             System.out.println(e.toString());
+            errorCountGet++;
             return;
         }
 
         try {
-            printAppleJuiceInformation(payload);
-            errorCountGet = 0;
+            payload = handleAppleJuiceInformation(payload);
         } catch (Exception e) {
             e.printStackTrace();
-            errorCountGet++;
         }
 
         updateTooltip();
@@ -133,20 +135,27 @@ public class Collector extends TimerTask implements ActionListener {
         trayIcon.setToolTip(Info);
     }
 
-    private void printAppleJuiceInformation(String payload) throws Exception {
+    private String handleAppleJuiceInformation(String payload) throws Exception {
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();
         Document document = db.parse(new InputSource(new StringReader(payload)));
 
         XPathFactory xpf = XPathFactory.newInstance();
         XPath xpath = xpf.newXPath();
-        Element ajInfos = (Element) xpath.evaluate("/applejuice/information", document, XPathConstants.NODE);
+        Element coreInfo = (Element) xpath.evaluate("/applejuice/information", document, XPathConstants.NODE);
 
-        credits = Long.parseLong(ajInfos.getAttribute("credits"));
-        sessionupload = Long.parseLong(ajInfos.getAttribute("sessionupload"));
-        sessiondownload = Long.parseLong(ajInfos.getAttribute("sessiondownload"));
-        uploadspeed = Long.parseLong(ajInfos.getAttribute("uploadspeed"));
-        downloadspeed = Long.parseLong(ajInfos.getAttribute("downloadspeed"));
+        credits = Long.parseLong(coreInfo.getAttribute("credits"));
+        sessionupload = Long.parseLong(coreInfo.getAttribute("sessionupload"));
+        sessiondownload = Long.parseLong(coreInfo.getAttribute("sessiondownload"));
+        uploadspeed = Long.parseLong(coreInfo.getAttribute("uploadspeed"));
+        downloadspeed = Long.parseLong(coreInfo.getAttribute("downloadspeed"));
+
+        DOMImplementationLS lsImpl = (DOMImplementationLS) coreInfo.getOwnerDocument().getImplementation().getFeature("LS", "3.0");
+        LSSerializer serializer = lsImpl.createLSSerializer();
+        serializer.getDomConfig().setParameter("xml-declaration", false); //by default its true, so set it to false to get String without xml-declaration
+        payload = serializer.writeToString(coreInfo);
+
+        return payload;
     }
 
     public static String getHTTPResource(String urlToRead) throws Exception {

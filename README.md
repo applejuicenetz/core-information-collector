@@ -1,8 +1,18 @@
 # appleJuice Core Information Collector
 
+![](https://img.shields.io/github/v/release/applejuicenet/core-information-collector.svg)
+![](https://img.shields.io/github/license/applejuicenet/core-information-collector.svg)
+![](https://img.shields.io/docker/pulls/applejuicenet/core-information-collector.svg)
+![](https://img.shields.io/docker/image-size/applejuicenet/core-information-collector)
+![](https://github.com/applejuicenet/core-information-collector/workflows/docker/badge.svg)
+
 Dieses kleine Tool holt die Informationen von deinem Core (siehe unten `Platzhalter`) und leitet diese aufbereitet an eine definierte URL weiter.
 
 Diese Informationen sind außerdem als Tooltip mittels des `info_line` Parameters konfigurierbar und werden ebenfalls als `stdOut` ausgegeben.
+
+## Download
+
+rechts auf `Releases` klicken :wink: 
 
 ## Konfiguration
 

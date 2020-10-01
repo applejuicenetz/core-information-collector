@@ -259,7 +259,7 @@ public class Collector extends TimerTask implements ActionListener {
             try {
                 BufferedImage trayIconImage = ImageIO.read(getClass().getResource("icon.png"));
                 int trayIconWidth = new TrayIcon(trayIconImage).getSize().width;
-                trayIcon = new TrayIcon(trayIconImage.getScaledInstance(trayIconWidth, -1, Image.SCALE_SMOOTH), "Collector", menu);
+                trayIcon = new TrayIcon(trayIconImage.getScaledInstance(trayIconWidth, -1, Image.SCALE_SMOOTH), APP_NAME, menu);
 
                 systemTray.add(trayIcon);
             } catch (Exception e) {

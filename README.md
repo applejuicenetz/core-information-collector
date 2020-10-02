@@ -43,6 +43,7 @@ Es sind folgende Platzhalter in `info_line` und `forward_line` möglich:
 | `%coreVersion%`         | 0.31.149.111 | überall   |
 | `%coreSystem%`          | Windows      | überall   |
 | `%coreCredits%`         | 15,5GB       | überall   |
+| `%coreConnections%`     | 21           | überall   |
 | `%coreSessionUpload%`   | 31GB         | überall   |
 | `%coreSessionDownload%` | 2GB          | überall   |
 | `%coreUploadSpeed%`     | 1,2MB/s      | überall   |

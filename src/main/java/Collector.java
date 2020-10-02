@@ -39,6 +39,7 @@ public class Collector extends TimerTask implements ActionListener {
     private String coreSystem;
 
     private long coreCredits;
+    private long coreConnections;
     private long coreSessionUpload;
     private long coreSessionDownload;
     private long coreUploadSpeed;
@@ -71,6 +72,8 @@ public class Collector extends TimerTask implements ActionListener {
             getCoreVersion();
         } catch (Exception e) {
             e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Konnte keine Verbindung zum Core aufbauen.", APP_NAME, JOptionPane.ERROR_MESSAGE, appIcon);
+            System.exit(-1);
         }
 
         run();
@@ -167,6 +170,7 @@ public class Collector extends TimerTask implements ActionListener {
         coreDownloads = document.getElementsByTagName("download").getLength();
 
         coreCredits = Long.parseLong(coreInfo.getAttribute("credits"));
+        coreConnections = Long.parseLong(coreInfo.getAttribute("openconnections"));
         coreSessionUpload = Long.parseLong(coreInfo.getAttribute("sessionupload"));
         coreSessionDownload = Long.parseLong(coreInfo.getAttribute("sessiondownload"));
         coreUploadSpeed = Long.parseLong(coreInfo.getAttribute("uploadspeed"));
@@ -215,6 +219,7 @@ public class Collector extends TimerTask implements ActionListener {
                 .replace("%coreVersion%", coreVersion)
                 .replace("%coreSystem%", coreSystem)
                 .replace("%coreCredits%", readableFileSize(coreCredits))
+                .replace("%coreConnections%", readableFileSize(coreConnections))
                 .replace("%coreSessionUpload%", readableFileSize(coreSessionUpload))
                 .replace("%coreSessionDownload%", readableFileSize(coreSessionDownload))
                 .replace("%coreUploadSpeed%", readableFileSize(coreUploadSpeed) + "/s")
@@ -230,6 +235,7 @@ public class Collector extends TimerTask implements ActionListener {
                 .replace("%coreVersion%", coreVersion)
                 .replace("%coreSystem%", coreSystem)
                 .replace("%coreCredits%", readableFileSize(coreCredits))
+                .replace("%coreConnections%", readableFileSize(coreConnections))
                 .replace("%coreSessionUpload%", readableFileSize(coreSessionUpload))
                 .replace("%coreSessionDownload%", readableFileSize(coreSessionDownload))
                 .replace("%coreUploadSpeed%", readableFileSize(coreUploadSpeed) + "/s")

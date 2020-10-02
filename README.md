@@ -24,7 +24,7 @@ Hat der Core ein Passwort und/oder läuft auf einem anderen Gerät, muss die ini
 
 | Konfiguration   | Wert         | Erklärung                  | Beispiel                                                                          |
 |-----------------|--------------|----------------------------|-----------------------------------------------------------------------------------|
-| `info_line `    | `Text`       | Text mit Platzhaltern      | `Credits %coreCredits% - Uploaded %coreSessionUpload% - Upload %coreUploadSpeed%` |
+| `info_line`     | `Text`       | Text mit Platzhaltern      | `Credits %coreCredits% - Uploaded %coreSessionUpload% - Upload %coreUploadSpeed%` |
 | `forward_url`   | `valid url`  | API URL für `forward_line` | `https://discord-bot.knastbruder.applejuicent.de/api/core-collector` oder `off`   |
 | `forward_line`  | `Text`       | Text mit Platzhaltern      | `Credits %coreCredits% - Uploaded %coreSessionUpload% - Upload %coreUploadSpeed%` |
 | `forward_token` | `Text`       | Auth Token für die API URL | `d9c1f872-5f48-42af-bd0d-601f2f05352a` (bekommst du vom Discord Bot)              |
@@ -33,6 +33,7 @@ Hat der Core ein Passwort und/oder läuft auf einem anderen Gerät, muss die ini
 | `core_host`     | `valid host` | IP des Core mit Protokoll  | Bei den meisten `http://127.0.0.1`                                                |
 | `core_passwd`   | `md5sum`     | MD5 Passwort vom Core      | `de305845b091d971732a123977e2d816` kann aus der `settings.xml` entnommen werden   |
 
+alle Konfigurationswerte können auch als `Environment` Umgebung definiert werden, müssen dann aber als `Caps` geschrieben werden.
 
 ## Platzhalter
 
@@ -54,3 +55,23 @@ Es sind folgende Platzhalter in `info_line` und `forward_line` möglich:
 | `%networkUser%`         | 700          | info_line |
 | `%networkFiles%`        | 3.182.468    | info_line |
 | `%networkFileSize%`     | 798TB        | info_line |
+
+## als Docker Container
+
+```yaml
+version: '2.4'
+
+services:
+    applejuice_core_collector:
+        container_name: applejuice_core_collector
+        image: applejuicenet/core-information-collector:latest
+        network_mode: bridge
+        restart: always
+        mem_limit: 32MB
+        environment:
+            TZ: Europe/Berlin
+            CORE_HOST: http://192.168.155.10
+            CORE_PORT: 9851
+            CORE_PASSWD: de305845b091d971732a123977e2d816
+            FORWARD_TOKEN: bbd04788-0000-0000-0000-687bdf011a7a
+```

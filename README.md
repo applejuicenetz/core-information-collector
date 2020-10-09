@@ -20,7 +20,7 @@ Die Datei `core-information-collector.properties` wird beim ersten Start automat
 
 Sofern der Core auf dem gleichen Gerät läuft und kein Passwort hat, funktioniert das Tool ohne weiteres zutun.
 
-Hat der Core ein Passwort und/oder läuft auf einem anderen Gerät, muss die ini Datei entsprechend angepasst werden.
+Hat der Core ein Passwort und/oder läuft auf einem anderen Gerät, muss die `.properties` Datei entsprechend angepasst werden.
 
 | Konfiguration   | Wert         | Erklärung                  | Beispiel                                                                          |
 |-----------------|--------------|----------------------------|-----------------------------------------------------------------------------------|
@@ -33,28 +33,28 @@ Hat der Core ein Passwort und/oder läuft auf einem anderen Gerät, muss die ini
 | `core_host`     | `valid host` | IP des Core mit Protokoll  | Bei den meisten `http://127.0.0.1`                                                |
 | `core_passwd`   | `md5sum`     | MD5 Passwort vom Core      | `de305845b091d971732a123977e2d816` kann aus der `settings.xml` entnommen werden   |
 
-alle Konfigurationswerte können auch als `Environment` Umgebung definiert werden, müssen dann aber als `Caps` geschrieben werden.
+alle Konfigurationswerte können auch als `Environment` Umgebung definiert werden, **müssen** dann aber als `Caps` geschrieben werden (siehe unten Docker Beispiel).
 
 ## Platzhalter
 
 Es sind folgende Platzhalter in `info_line` und `forward_line` möglich:
 
-| Platzhalter             | Beispiel     | Wo        |
-|-------------------------|--------------|-----------|
-| `%coreVersion%`         | 0.31.149.111 | überall   |
-| `%coreSystem%`          | Windows      | überall   |
-| `%coreCredits%`         | 15,5GB       | überall   |
-| `%coreConnections%`     | 21           | überall   |
-| `%coreSessionUpload%`   | 31GB         | überall   |
-| `%coreSessionDownload%` | 2GB          | überall   |
-| `%coreUploadSpeed%`     | 1,2MB/s      | überall   |
-| `%coreDownloadSpeed%`   | 60kb/s       | überall   |
-| `%coreUploads%`         | 12           | überall   |
-| `%coreDownloads%`       | 8            | überall   |
-| `%coreDownloadsReady%`  | 3            | überall   |
-| `%networkUser%`         | 700          | info_line |
-| `%networkFiles%`        | 3.182.468    | info_line |
-| `%networkFileSize%`     | 798TB        | info_line |
+| Platzhalter             | Beispiel     |
+|-------------------------|--------------|
+| `%coreVersion%`         | 0.31.149.111 |
+| `%coreSystem%`          | Windows      |
+| `%coreCredits%`         | 15,5GB       |
+| `%coreConnections%`     | 21           |
+| `%coreSessionUpload%`   | 31GB         |
+| `%coreSessionDownload%` | 2GB          |
+| `%coreUploadSpeed%`     | 1,2MB/s      |
+| `%coreDownloadSpeed%`   | 60kb/s       |
+| `%coreUploads%`         | 12           |
+| `%coreDownloads%`       | 8            |
+| `%coreDownloadsReady%`  | 3            |
+| `%networkUser%`         | 700          |
+| `%networkFiles%`        | 3.182.468    |
+| `%networkFileSize%`     | 798TB        |
 
 ## als Docker Container
 

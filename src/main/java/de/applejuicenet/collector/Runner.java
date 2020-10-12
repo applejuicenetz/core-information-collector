@@ -165,7 +165,7 @@ public class Runner extends TimerTask {
         networkUser = Long.parseLong(networkInfo.getAttribute("users"));
         networkFiles = Long.parseLong(networkInfo.getAttribute("files"));
 
-        networkFileSize = Double.parseDouble(networkInfo.getAttribute("filesize"));
+        networkFileSize = Double.parseDouble(networkInfo.getAttribute("filesize").replace(",", "."));
     }
 
     private void forward() throws Exception {

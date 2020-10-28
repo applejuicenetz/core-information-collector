@@ -11,7 +11,7 @@ class Config {
 
     private static final String DEFAULT_INFO_LINE = "Credits %coreCredits% - Uploaded %coreSessionUpload% - Downloaded %coreSessionDownload% - Upload %coreUploadSpeed% - Download %coreDownloadSpeed%";
     private static final String DEFAULT_FORWARD_LINE = "Core `%coreVersion%` - Credits `%coreCredits%` - Uploaded `%coreSessionUpload%` - Downloaded `%coreSessionDownload%` - Upload `%coreUploadSpeed%` - Download `%coreDownloadSpeed%`";
-    private static final String DEFAULT_FORWARD_URL = "https://discord-bot.knastbruder.applejuicenet.de/api/core-collector";
+    private static final String DEFAULT_FORWARD_URL = "https://discord-bot.knastbruder.applejuicenet.cc/api/core-collector";
     private static final String DEFAULT_FORWARD_TOKEN = "";
     private static final String DEFAULT_INTERVAL = "60000";
     private static final String DEFAULT_CORE_HOST = "http://127.0.0.1";

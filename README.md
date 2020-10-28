@@ -25,7 +25,7 @@ Hat der Core ein Passwort und/oder läuft auf einem anderen Gerät, muss die `.p
 | Konfiguration   | Wert         | Erklärung                  | Beispiel                                                                          |
 |-----------------|--------------|----------------------------|-----------------------------------------------------------------------------------|
 | `info_line`     | `Text`       | Text mit Platzhaltern      | `Credits %coreCredits% - Uploaded %coreSessionUpload% - Upload %coreUploadSpeed%` |
-| `forward_url`   | `valid url`  | API URL für `forward_line` | `https://discord-bot.knastbruder.applejuicent.de/api/core-collector` oder `off`   |
+| `forward_url`   | `valid url`  | API URL für `forward_line` | `https://discord.applejuicent.cc/api/core-collector` oder `off`                   |
 | `forward_line`  | `Text`       | Text mit Platzhaltern      | `Credits %coreCredits% - Uploaded %coreSessionUpload% - Upload %coreUploadSpeed%` |
 | `forward_token` | `Text`       | Auth Token für die API URL | `d9c1f872-5f48-42af-bd0d-601f2f05352a` (bekommst du vom Discord Bot)              |
 | `interval`      | `60000`      | Millisekunden              | sollte nicht niedriger als `5000` (5 Sekunden) sein (Core überlastung möglich)    |
@@ -74,4 +74,6 @@ services:
             CORE_PORT: 9851
             CORE_PASSWD: de305845b091d971732a123977e2d816
             FORWARD_TOKEN: bbd04788-0000-0000-0000-687bdf011a7a
+            #FORWARD_LINE: ""
+            #INFO_LINE: ""
 ```

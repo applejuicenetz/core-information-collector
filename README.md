@@ -1,10 +1,8 @@
 # appleJuice Core Information Collector
 
-![](https://img.shields.io/github/v/release/applejuicenet/core-information-collector.svg)
-![](https://img.shields.io/github/license/applejuicenet/core-information-collector.svg)
-![](https://img.shields.io/docker/pulls/applejuicenet/core-information-collector.svg)
-![](https://img.shields.io/docker/image-size/applejuicenet/core-information-collector)
-![](https://github.com/applejuicenet/core-information-collector/workflows/docker/badge.svg)
+![](https://img.shields.io/github/v/release/applejuicenetz/core-information-collector.svg)
+![](https://img.shields.io/github/license/applejuicenetz/core-information-collector.svg)
+![](https://github.com/applejuicenetz/core-information-collector/workflows/docker/badge.svg)
 
 Dieses kleine Tool holt die Informationen von deinem Core (siehe unten `Platzhalter`) und leitet diese aufbereitet an eine definierte URL weiter.
 
@@ -64,13 +62,13 @@ version: '2.4'
 services:
     applejuice_core_collector:
         container_name: applejuice_core_collector
-        image: applejuicenet/core-information-collector:latest
+        image: ghcr.io/applejuicenetz/core-information-collector:latest
         network_mode: bridge
         restart: always
         mem_limit: 32MB
         environment:
             TZ: Europe/Berlin
-            CORE_HOST: http://192.168.155.10
+            CORE_HOST: http://192.168.1.10
             CORE_PORT: 9851
             CORE_PASSWD: de305845b091d971732a123977e2d816
             FORWARD_TOKEN: bbd04788-0000-0000-0000-687bdf011a7a

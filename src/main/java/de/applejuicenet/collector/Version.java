@@ -12,8 +12,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Version {
-    private static final String GITHUB_API_URL = "https://api.github.com/repos/applejuicenet/core-information-collector/releases/latest";
-    private static final String GITHUB_URL = "https://github.com/applejuicenet/core-information-collector/releases";
+    private static final String GITHUB_API_URL = "https://api.github.com/repos/applejuicenetz/core-information-collector/releases/latest";
+    private static final String GITHUB_URL = "https://github.com/applejuicenetz/core-information-collector/releases";
 
     private final Runner runner;
 

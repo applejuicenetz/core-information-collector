@@ -1,5 +1,6 @@
 package de.applejuicenet.collector;
 
+import com.eclipsesource.json.Json;
 import org.tinylog.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -175,12 +176,29 @@ public class Runner extends TimerTask {
         connection.setRequestProperty("Accept-Charset", charset);
         if (!config.getForwardToken().isEmpty()) {
             connection.setRequestProperty("Authorization", "Token " + config.getForwardToken());
-
         }
-        connection.setRequestProperty("Content-Type", "text/plain;charset=" + charset);
+
+        connection.setRequestProperty("Content-Type", "application/json;charset=" + charset);
+
+        String Line = Json.object()
+                .add("forward_line", replacePlaceHolder(config.getForwardLine()))
+                .add("core_version", coreVersion)
+                .add("core_system", coreSystem)
+                .add("core_credits", coreCredits)
+                .add("core_connections", coreConnections)
+                .add("core_upload", coreUploadSpeed)
+                .add("core_download", coreDownloadSpeed)
+                .add("core_session_upload", coreSessionUpload)
+                .add("core_session_download", coreSessionDownload)
+                .add("core_uploads", coreUploads)
+                .add("core_downloads", coreDownloads)
+                .add("core_downloads_ready", coreDownloadsReady)
+                .add("network_user", networkUser)
+                .add("network_files", networkFiles)
+                .add("network_file_size", networkFileSize)
+                .toString();
 
         try (OutputStream output = connection.getOutputStream()) {
-            String Line = replacePlaceHolder(config.getForwardLine());
             output.write(Line.getBytes(charset));
         }
 

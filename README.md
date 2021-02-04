@@ -23,9 +23,9 @@ Hat der Core ein Passwort und/oder läuft auf einem anderen Gerät, muss die `.p
 | Konfiguration   | Wert         | Erklärung                  | Beispiel                                                                          |
 |-----------------|--------------|----------------------------|-----------------------------------------------------------------------------------|
 | `info_line`     | `Text`       | Text mit Platzhaltern      | `Credits %coreCredits% - Uploaded %coreSessionUpload% - Upload %coreUploadSpeed%` |
-| `forward_url`   | `valid url`  | API URL für `forward_line` | `https://discord.applejuicent.cc/api/core-collector` oder `off`                   |
+| `forward_url`   | `valid url`  | API URL für `forward_line` | `http://5f297e.online-server.cloud:82/api/core-collector` oder `off`              |
 | `forward_line`  | `Text`       | Text mit Platzhaltern      | `Credits %coreCredits% - Uploaded %coreSessionUpload% - Upload %coreUploadSpeed%` |
-| `forward_token` | `Text`       | Auth Token für die API URL | `d9c1f872-5f48-42af-bd0d-601f2f05352a` (bekommst du vom Discord Bot)              |
+| `forward_token` | `Text`       | Auth Token für die API URL | `d9c1f872-5f48-42af-bd0d-601f2f05352a`                                            |
 | `interval`      | `60000`      | Millisekunden              | sollte nicht niedriger als `5000` (5 Sekunden) sein (Core überlastung möglich)    |
 | `core_port`     | `9851`       | Core XML Port              | Der XML API Port des Core                                                         |
 | `core_host`     | `valid host` | IP des Core mit Protokoll  | Bei den meisten `http://127.0.0.1`                                                |
@@ -39,7 +39,7 @@ Es sind folgende Platzhalter in `info_line` und `forward_line` möglich:
 
 | Platzhalter             | Beispiel     |
 |-------------------------|--------------|
-| `%coreVersion%`         | 0.31.149.111 |
+| `%coreVersion%`         | 0.31.149.112 |
 | `%coreSystem%`          | Windows      |
 | `%coreCredits%`         | 15,5GB       |
 | `%coreConnections%`     | 21           |
@@ -52,7 +52,7 @@ Es sind folgende Platzhalter in `info_line` und `forward_line` möglich:
 | `%coreDownloadsReady%`  | 3            |
 | `%networkUser%`         | 700          |
 | `%networkFiles%`        | 3.182.468    |
-| `%networkFileSize%`     | 798TB        |
+| `%networkFileSize%`     | 798TB    XR    |
 
 ## als Docker Container
 

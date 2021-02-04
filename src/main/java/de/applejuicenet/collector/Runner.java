@@ -17,6 +17,7 @@ import java.awt.*;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.NumberFormat;
@@ -171,8 +172,9 @@ public class Runner extends TimerTask {
 
     private void forward() throws Exception {
         String charset = "UTF-8";
-        URLConnection connection = new URL(config.getForwardUrl()).openConnection();
-        connection.setDoOutput(true); // Triggers POST.
+        HttpURLConnection connection = (HttpURLConnection) new URL(config.getForwardUrl()).openConnection();
+        connection.setDoOutput(true);
+        connection.setRequestMethod("POST");
         connection.setRequestProperty("Accept-Charset", charset);
         if (!config.getForwardToken().isEmpty()) {
             connection.setRequestProperty("Authorization", "Token " + config.getForwardToken());

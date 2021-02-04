@@ -176,6 +176,8 @@ public class Runner extends TimerTask {
         connection.setDoOutput(true);
         connection.setRequestMethod("POST");
         connection.setRequestProperty("Accept-Charset", charset);
+        connection.setRequestProperty("User-Agent", String.format("Collector/%s; Java/%s; (%s/%s)", Version.getVersion(), System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version")));
+
         if (!config.getForwardToken().isEmpty()) {
             connection.setRequestProperty("Authorization", "Token " + config.getForwardToken());
         }

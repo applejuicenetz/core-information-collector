@@ -48,6 +48,10 @@ public class Tray implements ActionListener {
                 runner.openStatusFrame();
                 break;
 
+            case "config":
+                runner.openConfigFrame();
+                break;
+
             case "about":
                 JOptionPane.showMessageDialog(null, "Version " + Version.getVersion(), runner.APP_NAME, JOptionPane.INFORMATION_MESSAGE, runner.appIcon);
                 break;
@@ -64,6 +68,10 @@ public class Tray implements ActionListener {
         MenuItem statusItem = new MenuItem("Status");
         statusItem.setActionCommand("status");
         menu.add(statusItem);
+
+        MenuItem configItem = new MenuItem("Config");
+        configItem.setActionCommand("config");
+        menu.add(configItem);
 
         MenuItem menuAbout = new MenuItem("About");
         menuAbout.setActionCommand("about");

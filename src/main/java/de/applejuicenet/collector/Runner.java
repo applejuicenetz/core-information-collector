@@ -19,7 +19,6 @@ import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.text.NumberFormat;
 import java.util.Timer;
 import java.util.*;
@@ -70,6 +69,8 @@ public class Runner extends TimerTask {
         Version version = new Version(this);
 
         version.check4update();
+
+        Logger.info("Collector Version " + Version.getVersion());
 
         run();
 
@@ -257,6 +258,33 @@ public class Runner extends TimerTask {
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setPreferredSize(new Dimension(300, 250));
+
+        JOptionPane.showMessageDialog(null, scrollPane, APP_NAME, JOptionPane.INFORMATION_MESSAGE, appIcon);
+    }
+
+    public void openConfigFrame() {
+        DefaultTableModel model = new DefaultTableModel(
+                new Object[]{"Key", "Value"}, 0
+        );
+
+        model.addRow(new Object[]{"forward_url", config.getForwardUrl()});
+        model.addRow(new Object[]{"forward_token", config.getForwardToken()});
+        model.addRow(new Object[]{"interval", config.getInterval()});
+        model.addRow(new Object[]{"core_host", config.getCoreHost()});
+        model.addRow(new Object[]{"core_port", config.getCorePort()});
+        model.addRow(new Object[]{"core_passwd", config.getCorePassword()});
+
+        JTable table = new JTable(model);
+        table.setEnabled(false);
+
+        table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
+        table.getColumnModel().getColumn(0).setMaxWidth(100);
+        table.getColumnModel().getColumn(1).setMaxWidth(350);
+
+        table.getTableHeader().setOpaque(false);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setPreferredSize(new Dimension(450, 120));
 
         JOptionPane.showMessageDialog(null, scrollPane, APP_NAME, JOptionPane.INFORMATION_MESSAGE, appIcon);
     }

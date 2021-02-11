@@ -14,28 +14,29 @@ rechts auf `Releases` klicken :wink:
 
 ## Konfiguration
 
-Die Datei `core-information-collector.properties` wird beim ersten Start automatisch im gleichen Ordner angelegt.
+Die Datei `core-information-collector.xml` wird beim ersten Start automatisch im gleichen Ordner angelegt.
 
-Sofern der Core auf dem gleichen Gerät läuft und kein Passwort hat, funktioniert das Tool ohne weiteres zutun.
+Sofern der Core auf dem gleichen Gerät läuft und kein Passwort hat, funktioniert der Collector ohne weiteres zutun.
 
-Hat der Core ein Passwort und/oder läuft auf einem anderen Gerät, muss die `.properties` Datei entsprechend angepasst werden.
+Hat der Core ein Passwort und/oder läuft auf einem anderen Gerät, muss die `.xml` Datei entsprechend angepasst werden.
 
 | Konfiguration   | Wert         | Erklärung                  | Beispiel                                                                          |
 |-----------------|--------------|----------------------------|-----------------------------------------------------------------------------------|
 | `info_line`     | `Text`       | Text mit Platzhaltern      | `Credits %coreCredits% - Uploaded %coreSessionUpload% - Upload %coreUploadSpeed%` |
-| `forward_url`   | `valid url`  | API URL für `forward_line` | `http://5f297e.online-server.cloud:82/api/core-collector` oder `off`              |
-| `forward_line`  | `Text`       | Text mit Platzhaltern      | `Credits %coreCredits% - Uploaded %coreSessionUpload% - Upload %coreUploadSpeed%` |
-| `forward_token` | `Text`       | Auth Token für die API URL | `d9c1f872-5f48-42af-bd0d-601f2f05352a`                                            |
 | `interval`      | `60000`      | Millisekunden              | sollte nicht niedriger als `5000` (5 Sekunden) sein (Core überlastung möglich)    |
-| `core_port`     | `9851`       | Core XML Port              | Der XML API Port des Core                                                         |
-| `core_host`     | `valid host` | IP des Core mit Protokoll  | Bei den meisten `http://127.0.0.1`                                                |
-| `core_passwd`   | `md5sum`     | MD5 Passwort vom Core      | `de305845b091d971732a123977e2d816` kann aus der `settings.xml` entnommen werden   |
+| `core > host`   | `valid host` | IP des Core mit Protokoll  | Bei den meisten `http://127.0.0.1`                                                |
+| `core > port `  | `9851`       | Core XML Port              | Der XML API Port des Core                                                         |
+| `core > passwd` | `md5sum`     | MD5 Passwort vom Core      | `de305845b091d971732a123977e2d816` kann aus der `settings.xml` entnommen werden   |
+| `target > url`  | `valid url`  | Ziel URL                   | `http://5f297e.online-server.cloud:82/api/core-collector/`                        |
+| `target > token`| `Text`       | Auth Token für die API URL | `d9c1f872-5f48-42af-bd0d-601f2f05352a`                                            |
+| `target > line` | `Text`       | Text mit Platzhaltern      | `Credits %coreCredits% - Uploaded %coreSessionUpload% - Upload %coreUploadSpeed%` |
 
-alle Konfigurationswerte können auch als `Environment` Umgebung definiert werden, **müssen** dann aber als `Caps` geschrieben werden (siehe unten Docker Beispiel).
+im Block `<targets>` können mehrere `<target> </target>` Einträge existieren um die gesammelten Daten an mehrere Endpunkte weiterzuleiten. 
+
 
 ## Platzhalter
 
-Es sind folgende Platzhalter in `info_line` und `forward_line` möglich:
+Es sind folgende Platzhalter in `info_line` und `target > line` möglich:
 
 | Platzhalter             | Beispiel     |
 |-------------------------|--------------|
@@ -52,7 +53,7 @@ Es sind folgende Platzhalter in `info_line` und `forward_line` möglich:
 | `%coreDownloadsReady%`  | 3            |
 | `%networkUser%`         | 700          |
 | `%networkFiles%`        | 3.182.468    |
-| `%networkFileSize%`     | 798TB    XR    |
+| `%networkFileSize%`     | 798TB        |
 
 ## als Docker Container
 

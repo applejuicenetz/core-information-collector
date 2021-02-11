@@ -25,7 +25,7 @@ import java.util.*;
 
 public class Runner extends TimerTask {
 
-    public final String APP_NAME = "appleJuice Core Information Collector";
+    public final String APP_NAME = "AJCollector";
 
     public final ImageIcon appIcon = new ImageIcon(getClass().getResource("/resources/icon.png"));
 
@@ -53,7 +53,7 @@ public class Runner extends TimerTask {
     private long networkFiles;
     private double networkFileSize;
 
-    private final Config config;
+    public final Config config;
 
     private final Tray tray;
 
@@ -103,7 +103,7 @@ public class Runner extends TimerTask {
             tray.setToolTip(InfoLine);
         }
 
-        if (!config.getForwardUrl().equals("off")) {
+        if (!config.getTargets().isEmpty()) {
             try {
                 forward();
             } catch (Exception e) {
@@ -171,43 +171,55 @@ public class Runner extends TimerTask {
         networkFileSize = Double.parseDouble(networkInfo.getAttribute("filesize").replace(",", "."));
     }
 
-    private void forward() throws Exception {
-        String charset = "UTF-8";
-        HttpURLConnection connection = (HttpURLConnection) new URL(config.getForwardUrl()).openConnection();
-        connection.setDoOutput(true);
-        connection.setRequestMethod("POST");
-        connection.setRequestProperty("Accept-Charset", charset);
-        connection.setRequestProperty("User-Agent", String.format("Collector/%s; Java/%s; (%s/%s)", Version.getVersion(), System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version")));
+    private void forward() {
+        config.getTargets().forEach(consumer -> {
+            try {
+                Target target = (Target) consumer;
 
-        if (!config.getForwardToken().isEmpty()) {
-            connection.setRequestProperty("Authorization", "Token " + config.getForwardToken());
-        }
+                String forwardUrl = target.getUrl();
+                String forwardToken = target.getToken();
+                String forwardLine = target.getLine();
 
-        connection.setRequestProperty("Content-Type", "application/json;charset=" + charset);
+                String charset = "UTF-8";
+                HttpURLConnection connection = (HttpURLConnection) new URL(forwardUrl).openConnection();
+                connection.setDoOutput(true);
+                connection.setRequestMethod("POST");
+                connection.setRequestProperty("Accept-Charset", charset);
+                connection.setRequestProperty("User-Agent", String.format("Collector/%s; Java/%s; (%s/%s)", Version.getVersion(), System.getProperty("java.version"), System.getProperty("os.name"), System.getProperty("os.version")));
 
-        String Line = Json.object()
-                .add("forward_line", replacePlaceHolder(config.getForwardLine()))
-                .add("core_version", coreVersion)
-                .add("core_system", coreSystem)
-                .add("core_credits", coreCredits)
-                .add("core_connections", coreConnections)
-                .add("core_upload", coreUploadSpeed)
-                .add("core_download", coreDownloadSpeed)
-                .add("core_session_upload", coreSessionUpload)
-                .add("core_session_download", coreSessionDownload)
-                .add("core_uploads", coreUploads)
-                .add("core_downloads", coreDownloads)
-                .add("core_downloads_ready", coreDownloadsReady)
-                .add("network_user", networkUser)
-                .add("network_files", networkFiles)
-                .add("network_file_size", networkFileSize)
-                .toString();
+                if (!forwardToken.isEmpty()) {
+                    connection.setRequestProperty("Authorization", "Token " + forwardToken);
+                }
 
-        try (OutputStream output = connection.getOutputStream()) {
-            output.write(Line.getBytes(charset));
-        }
+                connection.setRequestProperty("Content-Type", "application/json;charset=" + charset);
 
-        InputStream response = connection.getInputStream();
+                String Line = Json.object()
+                        .add("forward_line", replacePlaceHolder(forwardLine))
+                        .add("core_version", coreVersion)
+                        .add("core_system", coreSystem)
+                        .add("core_credits", coreCredits)
+                        .add("core_connections", coreConnections)
+                        .add("core_upload", coreUploadSpeed)
+                        .add("core_download", coreDownloadSpeed)
+                        .add("core_session_upload", coreSessionUpload)
+                        .add("core_session_download", coreSessionDownload)
+                        .add("core_uploads", coreUploads)
+                        .add("core_downloads", coreDownloads)
+                        .add("core_downloads_ready", coreDownloadsReady)
+                        .add("network_user", networkUser)
+                        .add("network_files", networkFiles)
+                        .add("network_file_size", networkFileSize)
+                        .toString();
+
+                try (OutputStream output = connection.getOutputStream()) {
+                    output.write(Line.getBytes(charset));
+                }
+
+                InputStream response = connection.getInputStream();
+            } catch (Exception e) {
+                Logger.error(e);
+            }
+        });
     }
 
     private String replacePlaceHolder(String Line) {
@@ -258,33 +270,6 @@ public class Runner extends TimerTask {
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setPreferredSize(new Dimension(300, 250));
-
-        JOptionPane.showMessageDialog(null, scrollPane, APP_NAME, JOptionPane.INFORMATION_MESSAGE, appIcon);
-    }
-
-    public void openConfigFrame() {
-        DefaultTableModel model = new DefaultTableModel(
-                new Object[]{"Key", "Value"}, 0
-        );
-
-        model.addRow(new Object[]{"forward_url", config.getForwardUrl()});
-        model.addRow(new Object[]{"forward_token", config.getForwardToken()});
-        model.addRow(new Object[]{"interval", config.getInterval()});
-        model.addRow(new Object[]{"core_host", config.getCoreHost()});
-        model.addRow(new Object[]{"core_port", config.getCorePort()});
-        model.addRow(new Object[]{"core_passwd", config.getCorePassword()});
-
-        JTable table = new JTable(model);
-        table.setEnabled(false);
-
-        table.setAutoResizeMode(JTable.AUTO_RESIZE_LAST_COLUMN);
-        table.getColumnModel().getColumn(0).setMaxWidth(100);
-        table.getColumnModel().getColumn(1).setMaxWidth(350);
-
-        table.getTableHeader().setOpaque(false);
-
-        JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setPreferredSize(new Dimension(450, 120));
 
         JOptionPane.showMessageDialog(null, scrollPane, APP_NAME, JOptionPane.INFORMATION_MESSAGE, appIcon);
     }

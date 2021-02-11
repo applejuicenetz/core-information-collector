@@ -1,5 +1,7 @@
 .idea
 *.iml
 target/
+build/
 *.properties
 *.log
+*.xml

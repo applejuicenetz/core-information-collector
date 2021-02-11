@@ -3,9 +3,11 @@ FROM openjdk:8-jre-alpine
 ARG BUILD_DATE
 ARG VCS_REF
 
-ADD https://github.com/applejuicenetz/core-information-collector/releases/latest/download/core-information-collector.jar /core-information-collector.jar
+RUN mkdir /app
 
-CMD ["java", "-jar", "/core-information-collector.jar"]
+ADD https://github.com/applejuicenetz/core-information-collector/releases/latest/download/AJCollector.jar /app/AJCollector.jar
+
+CMD ["java", "-Duser.home=/app", "-jar", "/app/AJCollector.jar"]
 
 LABEL org.opencontainers.image.vendor="appleJuiceNET" \
       org.opencontainers.image.url="https://applejuicenet.cc" \

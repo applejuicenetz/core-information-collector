@@ -48,8 +48,8 @@ public class Tray implements ActionListener {
                 runner.openStatusFrame();
                 break;
 
-            case "config":
-                runner.openConfigFrame();
+            case "run":
+                runner.run();
                 break;
 
             case "about":
@@ -69,9 +69,9 @@ public class Tray implements ActionListener {
         statusItem.setActionCommand("status");
         menu.add(statusItem);
 
-        MenuItem configItem = new MenuItem("Config");
-        configItem.setActionCommand("config");
-        menu.add(configItem);
+        MenuItem runItem = new MenuItem("Execute");
+        runItem.setActionCommand("run");
+        menu.add(runItem);
 
         MenuItem menuAbout = new MenuItem("About");
         menuAbout.setActionCommand("about");
@@ -83,5 +83,4 @@ public class Tray implements ActionListener {
 
         return menu;
     }
-
 }

@@ -25,9 +25,9 @@ import java.util.*;
 
 public class Runner extends TimerTask {
 
-    public final String APP_NAME = "AJCollector";
+    public final static String APP_NAME = "AJCollector";
 
-    public final ImageIcon appIcon = new ImageIcon(getClass().getResource("/resources/icon.png"));
+    public final static ImageIcon appIcon = new ImageIcon(Runner.class.getResource("/resources/icon.png"));
 
     private final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
@@ -66,7 +66,7 @@ public class Runner extends TimerTask {
 
         tray = new Tray(this);
 
-        Version version = new Version(this);
+        Version version = new Version();
 
         version.check4update();
 
@@ -216,8 +216,9 @@ public class Runner extends TimerTask {
                 }
 
                 InputStream response = connection.getInputStream();
+                Logger.info(String.format("forward successful: %s", forwardUrl));
             } catch (Exception e) {
-                Logger.error(e);
+                Logger.error(e.getMessage());
             }
         });
     }

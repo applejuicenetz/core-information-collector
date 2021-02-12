@@ -6,6 +6,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.swing.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -93,8 +94,12 @@ class Config {
 
         try {
             readConfig();
-        } catch (ParserConfigurationException e) {
+        } catch (Exception e) {
             Logger.error(e);
+
+            JOptionPane.showMessageDialog(null, e.getMessage(), Runner.APP_NAME, JOptionPane.ERROR_MESSAGE, Runner.appIcon);
+
+            System.exit(1);
         }
     }
 
@@ -111,22 +116,14 @@ class Config {
         }
     }
 
-    private void readConfig() throws ParserConfigurationException {
+    private void readConfig() throws Exception {
         File file = new File(rootDirectory + File.separator + FILENAME_XML);
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
         Document document = null;
 
-        try {
-            document = documentBuilder.parse(file);
-            document.getDocumentElement().normalize();
-
-        } catch (SAXException e) {
-            Logger.error(e);
-        } catch (IOException e) {
-            Logger.error(e);
-            return;
-        }
+        document = documentBuilder.parse(file);
+        document.getDocumentElement().normalize();
 
         infoLine = document.getElementsByTagName("infoLine").item(0).getTextContent();
         intervall = document.getDocumentElement().getAttribute("intervall");

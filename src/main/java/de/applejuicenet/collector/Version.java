@@ -15,12 +15,6 @@ public class Version {
     private static final String GITHUB_API_URL = "https://api.github.com/repos/applejuicenetz/core-information-collector/releases/latest";
     private static final String GITHUB_URL = "https://github.com/applejuicenetz/core-information-collector/releases";
 
-    private final Runner runner;
-
-    public Version(Runner runner) {
-        this.runner = runner;
-    }
-
     public void check4update() {
         String payload;
         try {
@@ -36,14 +30,14 @@ public class Version {
         final String newVersion = obj.getString("tag_name", "0.0.0");
 
         if (!currentVersion.contains("SNAPSHOT") && compareVersion(newVersion, currentVersion) > 0) {
-            final String updateMessage = "neue Version %newVersion% verfügbar, download Seite öffnen?".replace("%newVersion%", newVersion);
+            final String updateMessage = "neue Version %newVersion% gefunden, zur download Seite?".replace("%newVersion%", newVersion);
             int input = JOptionPane.showConfirmDialog(
                     null,
                     updateMessage,
-                    runner.APP_NAME,
+                    Runner.APP_NAME,
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.INFORMATION_MESSAGE,
-                    runner.appIcon);
+                    Runner.appIcon);
 
             if (0 == input) {
                 openUpdatenUrl();

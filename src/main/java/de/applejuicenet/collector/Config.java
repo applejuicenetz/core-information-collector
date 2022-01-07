@@ -29,7 +29,6 @@ import java.util.Properties;
 class Config {
     private static String rootDirectory = null;
 
-    private final String FILENAME_PROPS = "core-information-collector.properties";
     private final String FILENAME_XML = "core-information-collector.xml";
 
     private static final String DEFAULT_INFO_LINE = "Credits %coreCredits% - Uploaded %coreSessionUpload% - Downloaded %coreSessionDownload% - Upload %coreUploadSpeed% - Download %coreDownloadSpeed%";
@@ -61,22 +60,12 @@ class Config {
             aFile.mkdir();
         }
 
-        try {
-            moveConfig();
-        } catch (IOException e) {
-            Logger.error(e);
-        }
-
-        File fileProps = new File(rootDirectory + File.separator + this.FILENAME_PROPS);
         File fileXML = new File(rootDirectory + File.separator + this.FILENAME_XML);
-
-        if (fileProps.exists() && !fileXML.exists()) {
-            convertPropertiestoXML();
-        }
 
         if (!fileXML.exists()) {
             try {
                 createConfig(
+                        fileXML,
                         DEFAULT_INFO_LINE,
                         DEFAULT_INTERVALL,
                         DEFAULT_CORE_HOST,
@@ -86,7 +75,6 @@ class Config {
                         DEFAULT_FORWARD_URL,
                         DEFAULT_FORWARD_TOKEN
                 );
-                fileProps.delete();
             } catch (Exception e) {
                 Logger.error(e);
             }
@@ -100,19 +88,6 @@ class Config {
             JOptionPane.showMessageDialog(null, e.getMessage(), Runner.APP_NAME, JOptionPane.ERROR_MESSAGE, Runner.appIcon);
 
             System.exit(1);
-        }
-    }
-
-    private void moveConfig() throws IOException {
-        File fileProps = new File(this.FILENAME_PROPS);
-        File fileXML = new File(this.FILENAME_XML);
-
-        if (fileProps.exists()) {
-            Files.move(Paths.get(this.FILENAME_PROPS), Paths.get(rootDirectory + File.separator + this.FILENAME_PROPS), StandardCopyOption.REPLACE_EXISTING);
-        }
-
-        if (fileXML.exists()) {
-            Files.move(Paths.get(this.FILENAME_XML), Paths.get(rootDirectory + File.separator + this.FILENAME_XML), StandardCopyOption.REPLACE_EXISTING);
         }
     }
 
@@ -170,32 +145,7 @@ class Config {
         return targets;
     }
 
-    private void convertPropertiestoXML() {
-        Properties props = new Properties();
-
-        try {
-            InputStream fis = new FileInputStream(this.FILENAME_PROPS);
-            props.load(fis);
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-        try {
-            createConfig(
-                    props.getProperty("info_line"),
-                    props.getProperty("interval"),
-                    props.getProperty("core_host"),
-                    props.getProperty("core_port"),
-                    props.getProperty("core_passwd"),
-                    props.getProperty("forward_line"),
-                    props.getProperty("forward_url"),
-                    props.getProperty("forward_token")
-            );
-        } catch (Exception e) {
-            Logger.error(e);
-        }
-    }
-
-    private void createConfig(String infoLine, String intervall, String host, String port, String password, String forwardLine, String forwardUrl, String forwardToken) throws Exception {
+    private void createConfig(File fileXML, String infoLine, String intervall, String host, String port, String password, String forwardLine, String forwardUrl, String forwardToken) throws Exception {
         Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
         Element root = doc.createElement("collector");
         root.setAttribute("intervall", intervall);
@@ -240,7 +190,7 @@ class Config {
         transformer.setOutputProperty(OutputKeys.INDENT, "yes");
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "2");
 
-        StreamResult streamResult = new StreamResult(new File(FILENAME_XML));
+        StreamResult streamResult = new StreamResult(fileXML);
         transformer.transform(domSource, streamResult);
     }
 }

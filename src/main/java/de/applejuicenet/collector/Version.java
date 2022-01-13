@@ -30,17 +30,20 @@ public class Version {
         final String newVersion = obj.getString("tag_name", "0.0.0");
 
         if (!currentVersion.contains("SNAPSHOT") && compareVersion(newVersion, currentVersion) > 0) {
-            final String updateMessage = "neue Version %newVersion% gefunden, zur download Seite?".replace("%newVersion%", newVersion);
-            int input = JOptionPane.showConfirmDialog(
-                    null,
-                    updateMessage,
-                    Runner.APP_NAME,
-                    JOptionPane.YES_NO_OPTION,
-                    JOptionPane.INFORMATION_MESSAGE,
-                    Runner.appIcon);
+            if (GraphicsEnvironment.isHeadless()) {
+                Logger.info("neue Version %newVersion% gefunden".replace("%newVersion%", newVersion));
+            } else {
+                int input = JOptionPane.showConfirmDialog(
+                        null,
+                        "neue Version %newVersion% gefunden, zur download Seite?".replace("%newVersion%", newVersion),
+                        Runner.APP_NAME,
+                        JOptionPane.YES_NO_OPTION,
+                        JOptionPane.INFORMATION_MESSAGE,
+                        Runner.appIcon);
 
-            if (0 == input) {
-                openUpdatenUrl();
+                if (0 == input) {
+                    openUpdatenUrl();
+                }
             }
         }
     }

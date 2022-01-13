@@ -1,0 +1,64 @@
+name: applejuice-collector
+title: appleJuice Collector
+summary: appleJuice Collector for appleJuice Client
+description: appleJuice Collector for appleJuice Client
+version: 2.1.4
+icon: snap/gui/applejuice-collector.png
+source-code: https://github.com/applejuicenetz/core-information-collector
+license: MIT
+
+grade: stable
+confinement: strict
+base: core18
+
+architectures:
+    -   build-on: amd64
+    -   build-on: i386
+    -   build-on: armhf
+    -   build-on: arm64
+
+layout:
+    /usr/bin/xprop:
+        bind-file: $SNAP/usr/bin/xprop
+
+apps:
+    collector:
+        command: $SNAP/app/launcher
+        extensions:
+            - gnome-3-28
+        environment:
+            JAVA_HOME: $SNAP/usr/lib/jvm/java-11-openjdk-$SNAP_ARCH/
+            PATH: $JAVA_HOME/jre/bin:$PATH
+        plugs:
+            - home
+            - desktop
+            - desktop-legacy
+            - network
+            - network-bind
+            - audio-playback
+            - x11
+
+parts:
+    collector:
+        plugin: nil
+        override-pull: wget -P $SNAPCRAFT_PART_INSTALL https://github.com/applejuicenetz/core-information-collector/releases/download/$SNAPCRAFT_PROJECT_VERSION/AJCollector.jar
+        build-packages:
+            - wget
+        organize:
+            'AJCollector.jar': app/
+
+    jre:
+        plugin: nil
+        build-packages:
+            - ca-certificates
+            - ca-certificates-java
+            - openjdk-11-jre
+        stage-packages:
+            - openjdk-11-jre
+            - x11-utils
+
+    launcher:
+        plugin: dump
+        source: ./snap/local
+        organize:
+            '*': app/

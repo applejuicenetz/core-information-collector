@@ -1,0 +1,5 @@
+#!/bin/sh
+
+cd $SNAP/app/
+
+java -jar AJCollector.jar "${@}"

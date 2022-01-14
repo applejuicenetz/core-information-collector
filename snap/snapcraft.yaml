@@ -4,7 +4,6 @@ summary: appleJuice Collector for appleJuice Client
 description: appleJuice Collector for appleJuice Client
 version: 2.1.4
 icon: snap/gui/applejuice-collector.png
-source-code: https://github.com/applejuicenetz/core-information-collector
 license: MIT
 
 grade: stable
@@ -27,15 +26,14 @@ apps:
     extensions:
       - gnome-3-28
     environment:
-      JAVA_HOME: $SNAP/usr/lib/jvm/java-11-openjdk-$SNAP_ARCH/
-      PATH: $JAVA_HOME/jre/bin:$PATH
+      JAVA_HOME: $SNAP/usr/lib/jvm/java-11-openjdk-$SNAP_ARCH
+      PATH: $JAVA_HOME/bin:$PATH
     plugs:
       - home
       - desktop
       - desktop-legacy
       - network
       - network-bind
-      - audio-playback
       - x11
 
 parts:

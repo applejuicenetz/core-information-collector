@@ -16,11 +16,15 @@ import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 class Config {
     private static String rootDirectory = null;
 
     private final String FILENAME_XML = "core-information-collector.xml";
+
+    private static final String DEFAULT_TRAYICON = "true";
+    private static final String DEFAULT_TASKBARICON = "true";
 
     private static final String DEFAULT_INFO_LINE = "Credits %coreCredits% - Uploaded %coreSessionUpload% - Downloaded %coreSessionDownload% - Upload %coreUploadSpeed% - Download %coreDownloadSpeed%";
     private static final String DEFAULT_INTERVALL = "60000";
@@ -32,6 +36,9 @@ class Config {
     private static final String DEFAULT_FORWARD_LINE = "Core `%coreVersion%` - Credits `%coreCredits%` - Uploaded `%coreSessionUpload%` - Downloaded `%coreSessionDownload%` - Upload `%coreUploadSpeed%` - Download `%coreDownloadSpeed%`";
     private static final String DEFAULT_FORWARD_URL = "http://5f297e.online-server.cloud:82/api/core-collector";
     private static final String DEFAULT_FORWARD_TOKEN = "";
+
+    private String trayIcon = DEFAULT_TRAYICON;
+    private String taskbarIcon = DEFAULT_TASKBARICON;
 
     private String infoLine = DEFAULT_INFO_LINE;
     private String intervall = DEFAULT_INTERVALL;
@@ -48,7 +55,7 @@ class Config {
         File aFile = new File(rootDirectory);
 
         if (!aFile.exists()) {
-            aFile.mkdir();
+            aFile.mkdirs();
         }
 
         File fileXML = new File(rootDirectory + File.separator + this.FILENAME_XML);
@@ -57,6 +64,8 @@ class Config {
             try {
                 createConfig(
                         fileXML,
+                        DEFAULT_TASKBARICON,
+                        DEFAULT_INFO_LINE,
                         DEFAULT_INFO_LINE,
                         DEFAULT_INTERVALL,
                         DEFAULT_CORE_HOST,
@@ -86,13 +95,15 @@ class Config {
         File file = new File(rootDirectory + File.separator + FILENAME_XML);
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
-        Document document = null;
+        Document document;
 
         document = documentBuilder.parse(file);
         document.getDocumentElement().normalize();
 
         infoLine = document.getElementsByTagName("infoLine").item(0).getTextContent();
         intervall = document.getDocumentElement().getAttribute("intervall");
+        trayIcon = document.getDocumentElement().getAttribute("trayIcon");
+        taskbarIcon = document.getDocumentElement().getAttribute("taskbarIcon");
 
         Element coreConfig = (Element) document.getElementsByTagName("core").item(0);
 
@@ -112,6 +123,14 @@ class Config {
         }
     }
 
+    public Boolean isTrayIcon() {
+        return Objects.equals(trayIcon, "true") || Objects.equals(trayIcon, "");
+    }
+
+    public Boolean isTaskBarIcon() {
+        return Objects.equals(taskbarIcon, "true") || Objects.equals(taskbarIcon, "");
+    }
+
     public String getInfoLine() {
         return infoLine;
     }
@@ -129,17 +148,19 @@ class Config {
     }
 
     public String getCorePassword() {
-        return corePassword;
+        return !corePassword.equals("") ? corePassword : "d41d8cd98f00b204e9800998ecf8427e";
     }
 
     public List getTargets() {
         return targets;
     }
 
-    private void createConfig(File fileXML, String infoLine, String intervall, String host, String port, String password, String forwardLine, String forwardUrl, String forwardToken) throws Exception {
+    private void createConfig(File fileXML, String trayIcon, String taskbarIcon, String infoLine, String intervall, String host, String port, String password, String forwardLine, String forwardUrl, String forwardToken) throws Exception {
         Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
         Element root = doc.createElement("collector");
         root.setAttribute("intervall", intervall);
+        root.setAttribute("trayIcon", trayIcon);
+        root.setAttribute("taskbarIcon", taskbarIcon);
 
         Element info = doc.createElement("infoLine");
         info.appendChild(doc.createTextNode(infoLine));

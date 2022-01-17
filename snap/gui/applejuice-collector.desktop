@@ -7,3 +7,4 @@ Icon=${SNAP}/meta/gui/applejuice-collector.png
 Terminal=false
 Type=Application
 Categories=Java;Application;Network;
+StartupWMClass=AJCollector

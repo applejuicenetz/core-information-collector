@@ -2,7 +2,7 @@ name: applejuice-collector
 title: appleJuice Collector
 summary: appleJuice Collector for appleJuice Client
 description: appleJuice Collector for appleJuice Client
-version: 2.1.4
+version: 3.0.0
 icon: snap/gui/applejuice-collector.png
 license: MIT
 
@@ -18,22 +18,21 @@ architectures:
 
 layout:
   /usr/bin/xprop:
-    bind-file: $SNAP/usr/bin/xprop
+    bind-file: usr/bin/xprop
 
 apps:
   collector:
-    command: $SNAP/app/launcher
+    command: app/launcher
     extensions:
       - gnome-3-28
     environment:
-      JAVA_HOME: $SNAP/usr/lib/jvm/java-11-openjdk-$SNAP_ARCH
+      JAVA_HOME: usr/lib/jvm/java-11-openjdk-$SNAP_ARCH
       PATH: $JAVA_HOME/bin:$PATH
     plugs:
       - home
       - desktop
       - desktop-legacy
       - network
-      - network-bind
       - x11
 
 parts:

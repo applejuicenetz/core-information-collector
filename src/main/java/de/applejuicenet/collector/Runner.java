@@ -14,6 +14,8 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathFactory;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
@@ -28,6 +30,7 @@ public class Runner extends TimerTask {
     public final static String APP_NAME = "AJCollector";
 
     public final static ImageIcon appIcon = new ImageIcon(Runner.class.getResource("/resources/icon.png"));
+    public final static ImageIcon appLogo = new ImageIcon(Runner.class.getResource("/resources/logo.png"));
 
     private final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
@@ -55,7 +58,11 @@ public class Runner extends TimerTask {
 
     public final Config config;
 
-    private final Tray tray;
+    private final TaskbarAndTray tt;
+
+    private JFrame statusFrame;
+
+    private DefaultTableModel statusModel;
 
     public static void main(String[] args) {
         new Runner();
@@ -64,7 +71,7 @@ public class Runner extends TimerTask {
     public Runner() {
         config = new Config();
 
-        tray = new Tray(this);
+        tt = new TaskbarAndTray(this);
 
         Version version = new Version();
 
@@ -74,7 +81,12 @@ public class Runner extends TimerTask {
 
         run();
 
+        if (!GraphicsEnvironment.isHeadless()) {
+            buildStatusFrame();
+        }
+
         Timer timer = new Timer();
+        Logger.info(config.getInterval());
         timer.schedule(this, 1000, config.getInterval());
     }
 
@@ -100,7 +112,11 @@ public class Runner extends TimerTask {
         Logger.info(InfoLine);
 
         if (SystemTray.isSupported()) {
-            tray.setToolTip(InfoLine);
+            tt.setToolTip(InfoLine);
+        }
+
+        if (!GraphicsEnvironment.isHeadless()) {
+            updateStatusFramePanel();
         }
 
         if (!config.getTargets().isEmpty()) {
@@ -252,26 +268,56 @@ public class Runner extends TimerTask {
         replacer.put("%networkFileSize%", NumberFormatter.readableNetworkShareSize(networkFileSize, 0));
     }
 
-    public void openStatusFrame() {
-        DefaultTableModel model = new DefaultTableModel(
+    private void buildStatusFrame() {
+        statusFrame = new JFrame();
+        statusFrame.setTitle(APP_NAME);
+        statusFrame.setResizable(false);
+        statusFrame.setSize(300, 245);
+        statusFrame.setIconImage(appIcon.getImage());
+        statusFrame.setAlwaysOnTop(true);
+
+        JPanel pnlButton = new JPanel(new FlowLayout(FlowLayout.CENTER));
+
+        statusFrame.addKeyListener(new KeyAdapter() {
+            public void keyPressed(KeyEvent ke) {
+                if (ke.getKeyCode() == KeyEvent.VK_ESCAPE) {
+                    statusFrame.dispose();
+                }
+            }
+        });
+
+        statusModel = new DefaultTableModel(
                 new Object[]{"Key", "Value"}, 0
         );
 
-        Iterator<Map.Entry<String, String>> it = replacer.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<String, String> pair = it.next();
-            model.addRow(new Object[]{pair.getKey(), pair.getValue()});
-            it.remove();
-        }
-
-        JTable table = new JTable(model);
+        JTable table = new JTable();
+        table.setModel(statusModel);
         table.setEnabled(false);
 
         table.getTableHeader().setOpaque(false);
 
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setPreferredSize(new Dimension(300, 250));
+        scrollPane.setPreferredSize(new Dimension(299, 245));
 
-        JOptionPane.showMessageDialog(null, scrollPane, APP_NAME, JOptionPane.INFORMATION_MESSAGE, appIcon);
+        statusFrame.add(scrollPane, BorderLayout.CENTER);
+
+        statusFrame.add(pnlButton, BorderLayout.PAGE_END);
+
+        openStatusFrame();
+    }
+
+    private void updateStatusFramePanel() {
+        if (statusFrame != null && statusFrame.isVisible()) {
+            statusModel.setRowCount(0);
+            for (Map.Entry<String, String> pair : replacer.entrySet()) {
+                statusModel.addRow(new Object[]{pair.getKey(), pair.getValue()});
+            }
+        }
+    }
+
+    public void openStatusFrame() {
+        statusFrame.pack();
+        statusFrame.setLocationRelativeTo(null);
+        statusFrame.setVisible(true);
     }
 }

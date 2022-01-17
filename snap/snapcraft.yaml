@@ -18,15 +18,15 @@ architectures:
 
 layout:
   /usr/bin/xprop:
-    bind-file: usr/bin/xprop
+    bind-file: $SNAP/usr/bin/xprop
 
 apps:
   collector:
-    command: app/launcher
+    command: $SNAP/app/launcher
     extensions:
       - gnome-3-28
     environment:
-      JAVA_HOME: usr/lib/jvm/java-11-openjdk-$SNAP_ARCH
+      JAVA_HOME: $SNAP/usr/lib/jvm/java-11-openjdk-$SNAP_ARCH
       PATH: $JAVA_HOME/bin:$PATH
     plugs:
       - home

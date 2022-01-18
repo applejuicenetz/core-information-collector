@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.0.1
+
+- WM_CLASS für Linux korrekt gesetzt
+
 # 3.0.0
 
 - Minimum Java 11 JRE erforderlich

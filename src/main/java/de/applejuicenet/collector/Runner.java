@@ -82,6 +82,16 @@ public class Runner extends TimerTask {
         run();
 
         if (!GraphicsEnvironment.isHeadless()) {
+            if (System.getProperty("os.name").toLowerCase().contains("linux")) {
+                try {
+                    Toolkit xToolkit = Toolkit.getDefaultToolkit();
+                    java.lang.reflect.Field awtAppClassNameField = xToolkit.getClass().getDeclaredField("awtAppClassName");
+                    awtAppClassNameField.setAccessible(true);
+                    awtAppClassNameField.set(xToolkit, "AJCollector");
+                } catch (Exception ignored) {
+                }
+            }
+
             buildStatusFrame();
         }
 
@@ -272,7 +282,7 @@ public class Runner extends TimerTask {
         statusFrame = new JFrame();
         statusFrame.setTitle(APP_NAME);
         statusFrame.setResizable(false);
-        statusFrame.setSize(300, 245);
+        statusFrame.setSize(300, 250);
         statusFrame.setIconImage(appIcon.getImage());
         statusFrame.setAlwaysOnTop(true);
 
@@ -297,7 +307,7 @@ public class Runner extends TimerTask {
         table.getTableHeader().setOpaque(false);
 
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setPreferredSize(new Dimension(299, 245));
+        scrollPane.setPreferredSize(new Dimension(299, 250));
 
         statusFrame.add(scrollPane, BorderLayout.CENTER);
 

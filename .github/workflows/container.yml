@@ -2,6 +2,7 @@ name: 'container'
 
 on:
   release:
+    types: [ released ]
 
 jobs:
   docker:

@@ -30,9 +30,11 @@
     </dependencies>
 
     <build>
+        <finalName>AJCollector</finalName>
         <plugins>
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
+                <version>2.6</version>
                 <configuration>
                     <outputDirectory>${project.build.outputDirectory}/resources</outputDirectory>
                 </configuration>
@@ -40,6 +42,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
+                <version>3.2.4</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -63,6 +66,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
+                <version>3.2.0</version>
                 <configuration>
                     <archive>
                         <manifestEntries>
@@ -76,36 +80,6 @@
                         </manifest>
                     </archive>
                 </configuration>
-            </plugin>
-            <plugin>
-                <groupId>com.akathist.maven.plugins.launch4j</groupId>
-                <artifactId>launch4j-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>l4j-clui</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>launch4j</goal>
-                        </goals>
-                        <configuration>
-                            <headerType>gui</headerType>
-                            <jar>${project.build.directory}/${project.artifactId}-${project.version}.jar</jar>
-                            <outfile>${project.build.directory}/AJCollector.exe</outfile>
-                            <downloadUrl>http://java.com/download</downloadUrl>
-                            <supportUrl>https://applejuicenet.cc/</supportUrl>
-                            <icon>assets/windows/AJCollector.ico</icon>
-                            <singleInstance>
-                                <mutexName>AJCollector</mutexName>
-                            </singleInstance>
-                            <jre>
-                                <path>Java</path>
-                                <minVersion>11</minVersion>
-                                <bundledJreAsFallback>false</bundledJreAsFallback>
-                                <jdkPreference>preferJre</jdkPreference>
-                            </jre>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>io.github.fvarrui</groupId>
@@ -127,11 +101,12 @@
                             <platform>mac</platform>
                             <jreMinVersion>11</jreMinVersion>
                             <copyDependencies>false</copyDependencies>
-                            <runnableJar>${project.build.directory}/${project.artifactId}-${project.version}.jar</runnableJar>
+                            <runnableJar>${project.build.directory}/${project.build.finalName}.jar</runnableJar>
                             <macConfig>
                                 <appId>de.applejuicenet.collector</appId>
                                 <generateDmg>true</generateDmg>
                                 <generatePkg>false</generatePkg>
+                                <volumeName>${project.build.finalName}</volumeName>
                             </macConfig>
                         </configuration>
                     </execution>

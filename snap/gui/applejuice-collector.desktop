@@ -8,3 +8,4 @@ Terminal=false
 Type=Application
 Categories=Java;Application;Network;
 StartupWMClass=AJCollector
+SingleMainWindow=true

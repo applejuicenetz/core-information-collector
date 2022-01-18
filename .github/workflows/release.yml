@@ -1,0 +1,81 @@
+name: 'release'
+
+on:
+  create:
+    tags:
+
+jobs:
+  release:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Get the version
+        id: get_version
+        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
+
+      - name: Inject JDK
+        id: inject_jdk
+        uses: actions/setup-java@v2
+        with:
+          distribution: 'zulu'
+          java-version: 11
+
+      - name: update mvn version
+        id: update_mvn_package
+        run: mvn versions:set -DnewVersion=${{ steps.get_version.outputs.VERSION }}
+
+      - uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          branch: master
+          file_pattern: pom.xml
+          commit_message: Update mvn Package Version to ${{ steps.get_version.outputs.VERSION }}
+
+      - name: Build Packages
+        run: mvn package
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ steps.get_version.outputs.VERSION }}
+          draft: true
+          prerelease: true
+          body: aktuelles Changelog befindet sich [hier](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md#changelog)
+
+      - name: upload .jar
+        id: upload-release-asset-jar
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: target/AJCollector.jar
+          asset_name: AJCollector.jar
+          asset_content_type: application/zip
+
+      - name: upload windows setup
+        id: upload-release-asset-setup
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: launch4j/AJCollector.setup.exe
+          asset_name: AJCollector.setup.exe
+          asset_content_type: application/octet-stream
+
+      - name: upload macOS .dmg
+        id: upload-release-asset-dmg
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: target/AJCollector_${{github.ref_name}}.dmg
+          asset_name: AJCollector.dmg
+          asset_content_type: application/octet-stream

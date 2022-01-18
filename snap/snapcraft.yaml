@@ -22,7 +22,7 @@ apps:
     extensions:
       - gnome-3-28
     environment:
-      AJ_COLLECTOR_DISABLE_UPDATE_CHECK: yes
+      AJ_COLLECTOR_DISABLE_UPDATE_CHECK: "yes"
       JAVA_HOME: $SNAP/usr/lib/jvm/java-11-openjdk-$SNAP_ARCH
       PATH: $JAVA_HOME/bin:$PATH
     plugs:

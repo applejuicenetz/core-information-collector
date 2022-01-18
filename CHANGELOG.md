@@ -3,6 +3,7 @@
 # 3.0.1
 
 - WM_CLASS für Linux korrekt gesetzt
+- Umgebungsvariable `AJ_COLLECTOR_DISABLE_UPDATE_CHECK` mit dem Wert `yes` schaltet die Version prüfung ab
 
 # 3.0.0
 

@@ -38,8 +38,8 @@ public class Runner extends TimerTask {
 
     private final TreeMap<String, String> replacer = new TreeMap<>();
 
-    private String coreVersion;
-    private String coreSystem;
+    private String coreVersion = "?";
+    private String coreSystem = "?";
 
     private long coreCredits;
     private long coreConnections;
@@ -88,7 +88,8 @@ public class Runner extends TimerTask {
                     java.lang.reflect.Field awtAppClassNameField = xToolkit.getClass().getDeclaredField("awtAppClassName");
                     awtAppClassNameField.setAccessible(true);
                     awtAppClassNameField.set(xToolkit, "AJCollector");
-                } catch (Exception ignored) {
+                } catch (Exception e) {
+                    Logger.error(e);
                 }
             }
 
@@ -96,7 +97,7 @@ public class Runner extends TimerTask {
         }
 
         Timer timer = new Timer();
-        Logger.info(config.getInterval());
+
         timer.schedule(this, 1000, config.getInterval());
     }
 
@@ -143,7 +144,12 @@ public class Runner extends TimerTask {
 
         String payload;
 
-        payload = Http.get(url);
+        try {
+            payload = Http.get(url);
+        } catch (Exception e) {
+            Logger.error(e.getMessage());
+            return;
+        }
 
         handleAppleCoreVersion(payload);
     }
@@ -165,7 +171,12 @@ public class Runner extends TimerTask {
 
         String url = String.format("%s:%s/xml/modified.xml?password=%s", config.getCoreHost(), config.getCorePort(), config.getCorePassword());
 
-        payload = Http.get(url);
+        try {
+            payload = Http.get(url);
+        } catch (Exception e) {
+            Logger.error(e.getMessage());
+            return;
+        }
 
         handleAppleJuiceInformation(payload);
     }
@@ -250,9 +261,7 @@ public class Runner extends TimerTask {
     }
 
     private String replacePlaceHolder(String Line) {
-        Iterator<Map.Entry<String, String>> it = replacer.entrySet().iterator();
-        while (it.hasNext()) {
-            Map.Entry<String, String> pair = it.next();
+        for (Map.Entry<String, String> pair : replacer.entrySet()) {
             Line = Line.replace(pair.getKey(), pair.getValue());
         }
 

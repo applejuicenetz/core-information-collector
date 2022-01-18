@@ -9,6 +9,7 @@ import java.awt.*;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Version {
@@ -16,7 +17,7 @@ public class Version {
     private static final String GITHUB_URL = "https://github.com/applejuicenetz/core-information-collector/releases";
 
     public void check4update() {
-        if (System.getenv("AJ_COLLECTOR_DISABLE_UPDATE_CHECK").equals("yes")) {
+        if (Objects.equals(System.getenv("AJ_COLLECTOR_DISABLE_UPDATE_CHECK"), "yes")) {
             return;
         }
 

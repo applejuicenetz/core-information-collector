@@ -11,10 +11,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Get the version
-        id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF/refs\/tags\//}
-
       - name: Inject JDK
         id: inject_jdk
         uses: actions/setup-java@v2
@@ -24,7 +20,7 @@ jobs:
 
       - name: update mvn version
         id: update_mvn_package
-        run: mvn versions:set -DnewVersion=${{ steps.get_version.outputs.VERSION }}
+        run: mvn versions:set -DnewVersion=${{ github.ref_name }}
 
       - name: commit updated package_version
         id: commit_updated_package_version
@@ -32,7 +28,7 @@ jobs:
         with:
           branch: master
           file_pattern: pom.xml
-          commit_message: Update mvn Package Version to ${{ steps.get_version.outputs.VERSION }}
+          commit_message: Update mvn Package Version to ${{ github.ref_name }}
 
       - name: Build Packages
         run: mvn package
@@ -44,7 +40,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ github.ref }}
-          release_name: ${{ steps.get_version.outputs.VERSION }}
+          release_name: ${{ github.ref_name }}
           draft: true
           prerelease: true
           body: aktuelles Changelog befindet sich [hier](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md#changelog)

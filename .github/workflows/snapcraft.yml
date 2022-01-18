@@ -1,7 +1,6 @@
 name: 'snapcraft'
 
 on:
-  workflow_dispatch:
   release:
     types: [ released ]
 
@@ -12,20 +11,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: get latest tag
-        id: latestrelease
-        run: |
-          echo "::set-output name=version::$(curl -s https://api.github.com/repos/applejuicenetz/gui-java/releases/latest | jq -r '.tag_name')"
-
-      - name: confirm tag
-        run: |
-          echo ${{ steps.latestrelease.outputs.releasetag }}
-
-      - name: update snapcraft
-        run: |
-          sed -i "" 's#version: [0-9]*.[0-9]*.[0-9]*#version: ${{ steps.latestrelease.outputs.releasetag }}#' snap/snapcraft.yaml
+      - name: Set Snapcraft Version
+        uses: mikefarah/yq@master
+        with:
+          cmd: yq eval -i '.version = "${{ github.ref_name }}"' 'snap/snapcraft.yaml'
 
       - uses: stefanzweifel/git-auto-commit-action@v4
         with:
           file_pattern: snap/snapcraft.yaml
-          commit_message: Update Snapcraft Package to ${{ steps.latestrelease.outputs.releasetag }}
+          branch: master
+          commit_message: Update snapcraft package to ${{ github.ref_name }}

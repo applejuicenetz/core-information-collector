@@ -16,6 +16,10 @@ public class Version {
     private static final String GITHUB_URL = "https://github.com/applejuicenetz/core-information-collector/releases";
 
     public void check4update() {
+        if (System.getenv("AJ_COLLECTOR_DISABLE_UPDATE_CHECK").equals("yes")) {
+            return;
+        }
+
         String payload;
         try {
             payload = Http.get(GITHUB_API_URL);

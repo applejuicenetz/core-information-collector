@@ -5,27 +5,24 @@ description: appleJuice Collector for appleJuice Client
 version: 3.0.0
 icon: snap/gui/applejuice-collector.png
 license: MIT
-
 grade: stable
 confinement: strict
 base: core18
-
 architectures:
   - build-on: amd64
   - build-on: i386
   - build-on: armhf
   - build-on: arm64
-
 layout:
   /usr/bin/xprop:
     bind-file: $SNAP/usr/bin/xprop
-
 apps:
   collector:
     command: $SNAP/app/launcher
     extensions:
       - gnome-3-28
     environment:
+      AJ_COLLECTOR_DISABLE_UPDATE_CHECK: yes
       JAVA_HOME: $SNAP/usr/lib/jvm/java-11-openjdk-$SNAP_ARCH
       PATH: $JAVA_HOME/bin:$PATH
     plugs:
@@ -34,7 +31,6 @@ apps:
       - desktop-legacy
       - network
       - x11
-
 parts:
   collector:
     plugin: nil
@@ -43,7 +39,6 @@ parts:
       - wget
     organize:
       'AJCollector.jar': app/
-
   jre:
     plugin: nil
     build-packages:
@@ -53,7 +48,6 @@ parts:
     stage-packages:
       - openjdk-11-jre
       - x11-utils
-
   launcher:
     plugin: dump
     source: ./snap/local

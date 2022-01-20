@@ -31,6 +31,16 @@ apps:
       - desktop-legacy
       - network
       - x11
+  service:
+    command: $SNAP/app/launcher
+    daemon: simple
+    install-mode: disable
+    environment:
+      JAVA_HOME: $SNAP/usr/lib/jvm/java-11-openjdk-$SNAP_ARCH
+      PATH: $JAVA_HOME/bin:$PATH
+    plugs:
+      - home
+      - network
 parts:
   collector:
     plugin: nil

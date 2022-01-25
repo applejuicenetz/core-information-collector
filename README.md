@@ -112,7 +112,7 @@ services:
         image: ghcr.io/applejuicenetz/core-information-collector:latest
         network_mode: bridge
         restart: always
-        mem_limit: 32MB
+        mem_limit: 64MB
         volumes:
             - ~/applejuice/core-information-collector.xml:/app/appleJuice/collector/core-information-collector.xml
 ```

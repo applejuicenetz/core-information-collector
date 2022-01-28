@@ -13,6 +13,7 @@ import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
+import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +86,9 @@ class Config {
         } catch (Exception e) {
             Logger.error(e);
 
-            JOptionPane.showMessageDialog(null, e.getMessage(), Runner.APP_NAME, JOptionPane.ERROR_MESSAGE, Runner.appIcon);
+            if (!GraphicsEnvironment.isHeadless()) {
+                JOptionPane.showMessageDialog(null, e.getMessage(), Runner.APP_NAME, JOptionPane.ERROR_MESSAGE, Runner.appIcon);
+            }
 
             System.exit(1);
         }

@@ -5,7 +5,7 @@ on:
     types: [ released ]
 
 jobs:
-  docker:
+  container:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

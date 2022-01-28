@@ -30,7 +30,19 @@ public class TaskbarAndTray implements ActionListener {
 
         menu.addActionListener(this);
 
-        if (SystemTray.isSupported()) {
+        if (runner.config.isTaskBarIcon() && Taskbar.isTaskbarSupported()) {
+            final Taskbar taskbar = Taskbar.getTaskbar();
+
+            if (taskbar.isSupported(Taskbar.Feature.ICON_IMAGE)) {
+                taskbar.setIconImage(Runner.appLogo.getImage());
+            }
+
+            if (taskbar.isSupported(Taskbar.Feature.MENU)) {
+                taskbar.setMenu(menu);
+            }
+        }
+
+        if (runner.config.isTrayIcon() && SystemTray.isSupported()) {
             SystemTray systemTray = SystemTray.getSystemTray();
 
             try {
@@ -52,18 +64,6 @@ public class TaskbarAndTray implements ActionListener {
                 systemTray.add(trayIcon);
             } catch (Exception e) {
                 Logger.error(e);
-            }
-        }
-
-        if (Taskbar.isTaskbarSupported()) {
-            final Taskbar taskbar = Taskbar.getTaskbar();
-
-            if (taskbar.isSupported(Taskbar.Feature.ICON_IMAGE)) {
-                taskbar.setIconImage(Runner.appLogo.getImage());
-            }
-
-            if (taskbar.isSupported(Taskbar.Feature.MENU)) {
-                taskbar.setMenu(menu);
             }
         }
     }

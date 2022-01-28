@@ -1,8 +1,15 @@
-# appleJuice Core Information Collector
+# appleJuice Collector
 
 ![](https://img.shields.io/github/v/release/applejuicenetz/core-information-collector.svg)
+![](https://img.shields.io/github/downloads/applejuicenetz/core-information-collector/total)
 ![](https://img.shields.io/github/license/applejuicenetz/core-information-collector.svg)
-![](https://github.com/applejuicenetz/core-information-collector/workflows/docker/container.svg)
+
+![](https://github.com/applejuicenetz/core-information-collector/actions/workflows/container.yml/badge.svg)
+![](https://img.shields.io/docker/pulls/applejuicenetz/core-information-collector)
+![](https://img.shields.io/docker/image-size/applejuicenetz/core-information-collector)
+
+![](https://github.com/applejuicenetz/core-information-collector/actions/workflows/snapcraft.yml/badge.svg)
+![](https://snapcraft.io/applejuice-collector/badge.svg)
 
 Dieses kleine Tool holt die Informationen von deinem Core (siehe unten `Platzhalter`) und leitet diese aufbereitet an eine definierte URL weiter.
 

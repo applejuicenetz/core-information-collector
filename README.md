@@ -15,10 +15,18 @@ Dieses kleine Tool holt die Informationen von deinem Core (siehe unten `Platzhal
 
 Diese Informationen sind außerdem als Tooltip mittels des `info_line` Parameters konfigurierbar und werden ebenfalls als `stdOut` ausgegeben.
 
-## Download
 
+## Installation
 
-rechts auf `Releases` klicken :wink:
+| Platform 	| Link          	                                                                       |
+|----------	|------------------------------------------------------------------------------------------|
+| Windows  	| [setup.exe](https://github.com/applejuicenetz/core-information-collector/releases)   	   |
+| macOS    	| [AJCollector.dmg](https://github.com/applejuicenetz/core-information-collector/releases) |
+| Linux    	| [Snap Package](https://snapcraft.io/applejuice-collector)	                               |
+
+## Changelog
+
+Ein aktuelles Changelog befindet sich [hier](CHANGELOG.md)
 
 ## Konfiguration
 

@@ -31,7 +31,14 @@ jobs:
           commit_message: Update mvn Package Version to ${{ github.ref_name }}
 
       - name: Build Packages
+        id: mvn_package
         run: mvn package
+
+      - name: Publish to GitHub Packages
+        id: mvn_deploy
+        run: mvn deploy
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Create Release
         id: create_release

@@ -8,6 +8,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public class TaskbarAndTray implements ActionListener {
 
@@ -84,6 +86,15 @@ public class TaskbarAndTray implements ActionListener {
                 runner.run();
                 break;
 
+            case "config":
+                File configFile = Config.getConfigFile();
+                try {
+                    Desktop.getDesktop().open(configFile);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                break;
+
             case "about":
                 JOptionPane.showMessageDialog(null, "Version " + Version.getVersion(), runner.APP_NAME, JOptionPane.INFORMATION_MESSAGE, runner.appIcon);
                 break;
@@ -104,6 +115,10 @@ public class TaskbarAndTray implements ActionListener {
         MenuItem runItem = new MenuItem("Execute");
         runItem.setActionCommand("run");
         menu.add(runItem);
+
+        MenuItem configItem = new MenuItem("Config");
+        configItem.setActionCommand("config");
+        menu.add(configItem);
 
         MenuItem menuAbout = new MenuItem("About");
         menuAbout.setActionCommand("about");

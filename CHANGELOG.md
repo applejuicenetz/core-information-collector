@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.0.2
+
+- `config` menu item zum TaskBar icon hinzugefügt welches die XML Datei direkt öffnet (kein suchen mehr)
+
 # 3.0.1
 
 - WM_CLASS für Linux korrekt gesetzt

@@ -20,9 +20,8 @@ import java.util.List;
 import java.util.Objects;
 
 class Config {
-    private static String rootDirectory = null;
 
-    private final String FILENAME_XML = "core-information-collector.xml";
+    private static final String FILENAME_XML = "core-information-collector.xml";
 
     private static final String DEFAULT_TRAYICON = "true";
     private static final String DEFAULT_TASKBARICON = "true";
@@ -50,8 +49,8 @@ class Config {
 
     private List<Target> targets = new ArrayList<Target>();
 
-    public Config() {
-        rootDirectory = System.getProperty("user.home") + File.separator + "appleJuice" + File.separator + "collector";
+    public static File getConfigFile()  {
+        String rootDirectory = System.getProperty("user.home") + File.separator + "appleJuice" + File.separator + "collector";
 
         File aFile = new File(rootDirectory);
 
@@ -59,7 +58,7 @@ class Config {
             aFile.mkdirs();
         }
 
-        File fileXML = new File(rootDirectory + File.separator + this.FILENAME_XML);
+        File fileXML = new File(rootDirectory + File.separator + Config.FILENAME_XML);
 
         if (!fileXML.exists()) {
             try {
@@ -81,8 +80,14 @@ class Config {
             }
         }
 
+        return fileXML;
+    }
+
+    public Config() {
+        File configFile = getConfigFile();
+
         try {
-            readConfig();
+            readConfig(configFile);
         } catch (Exception e) {
             Logger.error(e);
 
@@ -94,13 +99,12 @@ class Config {
         }
     }
 
-    private void readConfig() throws Exception {
-        File file = new File(rootDirectory + File.separator + FILENAME_XML);
+    private void readConfig(File configFile) throws Exception {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
         Document document;
 
-        document = documentBuilder.parse(file);
+        document = documentBuilder.parse(configFile);
         document.getDocumentElement().normalize();
 
         infoLine = document.getElementsByTagName("infoLine").item(0).getTextContent();
@@ -158,7 +162,7 @@ class Config {
         return targets;
     }
 
-    private void createConfig(File fileXML, String trayIcon, String taskbarIcon, String infoLine, String intervall, String host, String port, String password, String forwardLine, String forwardUrl, String forwardToken) throws Exception {
+    private static void createConfig(File fileXML, String trayIcon, String taskbarIcon, String infoLine, String intervall, String host, String port, String password, String forwardLine, String forwardUrl, String forwardToken) throws Exception {
         Document doc = DocumentBuilderFactory.newInstance().newDocumentBuilder().newDocument();
         Element root = doc.createElement("collector");
         root.setAttribute("intervall", intervall);
@@ -209,3 +213,4 @@ class Config {
         transformer.transform(domSource, streamResult);
     }
 }
+

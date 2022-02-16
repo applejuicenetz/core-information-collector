@@ -48,8 +48,8 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: ${{ github.ref_name }}
-          draft: true
-          prerelease: true
+          draft: false
+          prerelease: false
           body: aktuelles Changelog befindet sich [hier](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md#changelog)
 
       - name: upload .jar

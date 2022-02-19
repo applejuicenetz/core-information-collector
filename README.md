@@ -30,7 +30,14 @@ Ein aktuelles Changelog befindet sich [hier](CHANGELOG.md)
 
 ## Konfiguration
 
-Die Datei `core-information-collector.xml` wird beim ersten Start automatisch in `~/appleJuice/collector/` angelegt.
+Die Konfiguration erfolgt mittels XML Datei `core-information-collector.xml`
+
+Diese kannst du öffnen, in dem du den Collector startest und per rechtsklick den Menüpunkt `config` auswählst.
+
+Alternativ findest du die Datei hier:
+- Windows: `C:\Benutzer\%USERNAME%\appleJuice\collector\`
+- Linux und macOS: `~/appleJuice/collector/`
+
 
 Sofern der Core auf dem gleichen Gerät läuft und kein Passwort hat, funktioniert der Collector ohne weiteres zutun.
 
@@ -53,7 +60,7 @@ im Block `<targets>` können mehrere `<target> </target>` Einträge existieren u
 
 ## Beispiel XML
 
-Inhalt der `~/appleJuice/collector/core-information-collector.xml` Datei
+Inhalt der `core-information-collector.xml` Datei
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -122,8 +129,8 @@ Für `!aj` im Discord
 version: '2.4'
 
 services:
-    applejuice_core_collector:
-        container_name: applejuice_core_collector
+    applejuice_collector:
+        container_name: applejuice_collector
         image: ghcr.io/applejuicenetz/core-information-collector:latest
         network_mode: bridge
         restart: always

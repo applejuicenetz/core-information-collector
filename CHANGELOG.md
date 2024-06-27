@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.0.3
+
+- die veraltete Collector URL `5f297e.online-server.cloud` mit `discord.applejuicenet.cc` ersetzt
+
 # 3.0.2
 
 - `config` menu item zum TaskBar icon hinzugefügt welches die XML Datei direkt öffnet (kein suchen mehr)

@@ -81,6 +81,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: target/AJCollector_${{github.ref_name}}.dmg
+          asset_path: target/assets/AJCollector_${{github.ref_name}}.dmg
           asset_name: AJCollector.dmg
           asset_content_type: application/octet-stream

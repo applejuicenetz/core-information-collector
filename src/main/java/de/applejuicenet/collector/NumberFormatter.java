@@ -6,7 +6,7 @@ public class NumberFormatter {
 
     public static String readableFileSize(long size) {
         if (size <= 0) return "0";
-        final String[] units = new String[]{"B", "kB", "MB", "GB", "TB"};
+        final String[] units = new String[]{"B", "kB", "MB", "GB", "TB", "PB"};
         int digitGroups = (int) (Math.log10(size) / Math.log10(1024));
         return new DecimalFormat("#,##0.##").format(size / Math.pow(1024, digitGroups)) + units[digitGroups];
     }
@@ -22,6 +22,8 @@ public class NumberFormatter {
                 faktor = 1024;
             } else if (share / 1048576 < 1024) {
                 faktor = 1048576;
+            } else if (share / 1073741824 < 1024) {
+                faktor = 1073741824;
             } else {
                 faktor = 1;
             }
@@ -41,6 +43,8 @@ public class NumberFormatter {
             result += "GB";
         } else if (faktor == 1048576) {
             result += "TB";
+        } else if (faktor == 1073741824) {
+            result += "PB";
         } else {
             result += "??";
         }

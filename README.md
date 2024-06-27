@@ -52,7 +52,7 @@ Hat der Core ein Passwort und/oder läuft auf einem anderen Gerät, muss die `.x
 | `core > host`    | `valid host` | IP des Core mit Protokoll  | Bei den meisten `http://127.0.0.1`                                                |
 | `core > port `   | `9851`       | Core XML Port              | Der XML API Port des Core                                                         |
 | `core > passwd`  | `md5sum`     | MD5 Passwort vom Core      | `de305845b091d971732a123977e2d816` kann aus der `settings.xml` entnommen werden   |
-| `target > url`   | `valid url`  | Ziel URL                   | `http://5f297e.online-server.cloud:82/api/core-collector/`                        |
+| `target > url`   | `valid url`  | Ziel URL                   | `https://discord.applejuicenet.cc/api/core-collector/`                        |
 | `target > token` | `Text`       | Auth Token für die API URL | `d9c1f872-5f48-42af-bd0d-601f2f05352a`                                            |
 | `target > line`  | `Text`       | Text mit Platzhaltern      | `Credits %coreCredits% - Uploaded %coreSessionUpload% - Upload %coreUploadSpeed%` |
 
@@ -71,7 +71,7 @@ Inhalt der `core-information-collector.xml` Datei
     <core host="http://127.0.0.1" password="" port="9851"/>
     <targets>
         <target>
-            <url>http://5f297e.online-server.cloud:82/api/core-collector/</url>
+            <url>https://discord.applejuicenet.cc/api/core-collector/</url>
             <token>_MEIN_TOKEN_</token>
             <line>Core `%coreVersion%` - Credits `%coreCredits%` - Uploaded `%coreSessionUpload%` - Downloaded `%coreSessionDownload%` - Upload `%coreUploadSpeed%` - Download `%coreDownloadSpeed%`
             </line>

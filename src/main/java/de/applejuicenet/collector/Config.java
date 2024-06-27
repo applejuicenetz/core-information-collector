@@ -34,7 +34,8 @@ class Config {
     private static final String DEFAULT_CORE_PASSWD = "";
 
     private static final String DEFAULT_FORWARD_LINE = "Core `%coreVersion%` - Credits `%coreCredits%` - Uploaded `%coreSessionUpload%` - Downloaded `%coreSessionDownload%` - Upload `%coreUploadSpeed%` - Download `%coreDownloadSpeed%`";
-    private static final String DEFAULT_FORWARD_URL = "http://5f297e.online-server.cloud:82/api/core-collector";
+    private static final String DEFAULT_FORWARD_URL = "https://discord.applejuicenet.cc/api/core-collector";
+    private static final String DEFAULT_FORWARD_URL_OLD = "http://5f297e.online-server.cloud:82/api/core-collector";
     private static final String DEFAULT_FORWARD_TOKEN = "";
 
     private String trayIcon = DEFAULT_TRAYICON;
@@ -49,7 +50,7 @@ class Config {
 
     private List<Target> targets = new ArrayList<Target>();
 
-    public static File getConfigFile()  {
+    public static File getConfigFile() {
         String rootDirectory = System.getProperty("user.home") + File.separator + "appleJuice" + File.separator + "collector";
 
         File aFile = new File(rootDirectory);
@@ -123,6 +124,11 @@ class Config {
         for (int j = 0; j < forwardTargets.getLength(); j++) {
             Element elem = (Element) forwardTargets.item(j);
             String forwardUrl = elem.getElementsByTagName("url").item(0).getTextContent();
+
+            if (forwardUrl.equals(DEFAULT_FORWARD_URL_OLD)) {
+                forwardUrl = DEFAULT_FORWARD_URL;
+            }
+
             String forwardToken = elem.getElementsByTagName("token").item(0).getTextContent();
             String forwardLine = elem.getElementsByTagName("line").item(0).getTextContent();
 

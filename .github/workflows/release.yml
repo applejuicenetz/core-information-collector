@@ -9,7 +9,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Inject JDK
         id: inject_jdk
@@ -24,7 +24,7 @@ jobs:
 
       - name: commit updated package_version
         id: commit_updated_package_version
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           branch: master
           file_pattern: pom.xml

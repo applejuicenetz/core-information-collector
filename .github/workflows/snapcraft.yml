@@ -2,21 +2,23 @@ name: 'snapcraft'
 
 on:
   release:
-    types: [ released ]
+    types:
+      - published
+      - released
 
 jobs:
   update:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Set Snapcraft Version
         uses: mikefarah/yq@master
         with:
           cmd: yq eval -i '.version = "${{ github.ref_name }}"' 'snap/snapcraft.yaml'
 
-      - uses: stefanzweifel/git-auto-commit-action@v4
+      - uses: stefanzweifel/git-auto-commit-action@v5
         with:
           file_pattern: snap/snapcraft.yaml
           branch: master

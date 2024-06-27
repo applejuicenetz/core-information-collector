@@ -6,4 +6,6 @@ RUN mkdir /app
 
 ADD https://github.com/applejuicenetz/core-information-collector/releases/download/${VERSION}/AJCollector.jar /app/AJCollector.jar
 
+WORKDIR /app
+
 CMD ["java", "-Duser.home=/app", "-jar", "/app/AJCollector.jar"]

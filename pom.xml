@@ -3,7 +3,7 @@
 
     <groupId>de.applejuicenet</groupId>
     <artifactId>core-information-collector</artifactId>
-    <version>3.0.3</version>
+    <version>3.0.4</version>
     <packaging>jar</packaging>
 
     <properties>

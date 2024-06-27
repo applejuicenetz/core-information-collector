@@ -35,7 +35,7 @@ class Config {
 
     private static final String DEFAULT_FORWARD_LINE = "Core `%coreVersion%` - Credits `%coreCredits%` - Uploaded `%coreSessionUpload%` - Downloaded `%coreSessionDownload%` - Upload `%coreUploadSpeed%` - Download `%coreDownloadSpeed%`";
     private static final String DEFAULT_FORWARD_URL = "https://discord.applejuicenet.cc/api/core-collector";
-    private static final String DEFAULT_FORWARD_URL_OLD = "http://5f297e.online-server.cloud:82/api/core-collector";
+    private static final String DEFAULT_FORWARD_URL_OLD = "5f297e.online-server.cloud";
     private static final String DEFAULT_FORWARD_TOKEN = "";
 
     private String trayIcon = DEFAULT_TRAYICON;
@@ -125,7 +125,8 @@ class Config {
             Element elem = (Element) forwardTargets.item(j);
             String forwardUrl = elem.getElementsByTagName("url").item(0).getTextContent();
 
-            if (forwardUrl.equals(DEFAULT_FORWARD_URL_OLD)) {
+            if (forwardUrl.contains(DEFAULT_FORWARD_URL_OLD)) {
+                Logger.info("Update forward URL from {} to {}", forwardUrl, DEFAULT_FORWARD_URL);
                 forwardUrl = DEFAULT_FORWARD_URL;
             }
 

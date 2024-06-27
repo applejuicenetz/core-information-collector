@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.0.4
+
+- die veraltete Collector URL `5f297e.online-server.cloud` mit `discord.applejuicenet.cc` ersetzt (nun in allen Fällen und mit Log Ausgabe)
+
 # 3.0.3
 
 - die veraltete Collector URL `5f297e.online-server.cloud` mit `discord.applejuicenet.cc` ersetzt

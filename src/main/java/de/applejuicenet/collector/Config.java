@@ -33,7 +33,7 @@ class Config {
     private static final String DEFAULT_CORE_PORT = "9851";
     private static final String DEFAULT_CORE_PASSWD = "";
 
-    private static final String DEFAULT_FORWARD_LINE = "Core `%coreVersion%` - Credits `%coreCredits%` - Uploaded `%coreSessionUpload%` - Downloaded `%coreSessionDownload%` - Upload `%coreUploadSpeed%` - Download `%coreDownloadSpeed%`";
+    private static final String DEFAULT_FORWARD_LINE = "Core `%coreVersion%` - Credits `%coreCredits%` - Uploaded `%coreSessionUpload%` - Downloaded `%coreSessionDownload%` - Upload `%coreUploadSpeed%` - Download `%coreDownloadSpeed%` - Share `%shareFiles%` Files (`%shareSize%`)";
     private static final String DEFAULT_FORWARD_URL = "https://discord.applejuicenet.cc/api/core-collector";
     private static final String DEFAULT_FORWARD_URL_OLD = "5f297e.online-server.cloud";
     private static final String DEFAULT_FORWARD_TOKEN = "";

@@ -52,6 +52,9 @@ public class Runner extends TimerTask {
     private long coreDownloads;
     private long coreDownloadsReady;
 
+    private long shareFiles;
+    private long sharedSize;
+
     private long networkUser;
     private long networkFiles;
     private double networkFileSize;
@@ -104,6 +107,13 @@ public class Runner extends TimerTask {
     public void run() {
         try {
             prepareCoreVersion();
+        } catch (Exception e) {
+            Logger.error(e);
+            return;
+        }
+
+        try {
+            prepareShare();
         } catch (Exception e) {
             Logger.error(e);
             return;
@@ -164,6 +174,37 @@ public class Runner extends TimerTask {
 
         coreVersion = generalinformationVersion.getFirstChild().getNodeValue();
         coreSystem = generalinformationSystem.getFirstChild().getNodeValue();
+    }
+
+    private void prepareShare() throws Exception {
+        String url = String.format("%s:%s/xml/share.xml?password=%s", config.getCoreHost(), config.getCorePort(), config.getCorePassword());
+
+        String payload;
+
+        try {
+            payload = Http.get(url);
+        } catch (Exception e) {
+            Logger.error(e.getMessage());
+            return;
+        }
+
+        handleShare(payload);
+    }
+
+    private void handleShare(String payload) throws Exception {
+        DocumentBuilder db = dbf.newDocumentBuilder();
+        Document document = db.parse(new InputSource(new StringReader(payload)));
+
+        XPath xpath = xpf.newXPath();
+        Element shares = (Element) xpath.evaluate("/applejuice/shares", document, XPathConstants.NODE);
+
+        shareFiles = 0;
+        sharedSize = 0;
+        for (int i = 0; i < shares.getElementsByTagName("share").getLength(); i++) {
+            Element file = (Element) document.getElementsByTagName("share").item(i);
+            shareFiles++;
+            sharedSize += Long.parseLong(file.getAttribute("size"));
+        }
     }
 
     private void prepareAppleJuiceInformation() throws Exception {
@@ -243,6 +284,8 @@ public class Runner extends TimerTask {
                         .add("core_uploads", coreUploads)
                         .add("core_downloads", coreDownloads)
                         .add("core_downloads_ready", coreDownloadsReady)
+                        .add("share_files", shareFiles)
+                        .add("share_size", sharedSize)
                         .add("network_user", networkUser)
                         .add("network_files", networkFiles)
                         .add("network_file_size", networkFileSize)
@@ -282,6 +325,9 @@ public class Runner extends TimerTask {
         replacer.put("%coreDownloads%", Long.toString(coreDownloads));
         replacer.put("%coreDownloadsReady%", Long.toString(coreDownloadsReady));
 
+        replacer.put("%shareFiles%", NumberFormat.getNumberInstance(Locale.GERMAN).format(shareFiles));
+        replacer.put("%shareSize%", NumberFormatter.readableFileSize(sharedSize));
+
         replacer.put("%networkUser%", Long.toString(networkUser));
         replacer.put("%networkFiles%", NumberFormat.getNumberInstance(Locale.GERMAN).format(networkFiles));
         replacer.put("%networkFileSize%", NumberFormatter.readableNetworkShareSize(networkFileSize, 0));
@@ -291,7 +337,7 @@ public class Runner extends TimerTask {
         statusFrame = new JFrame();
         statusFrame.setTitle(APP_NAME);
         statusFrame.setResizable(false);
-        statusFrame.setSize(300, 250);
+        statusFrame.setSize(300, 280);
         statusFrame.setIconImage(appIcon.getImage());
         statusFrame.setAlwaysOnTop(true);
 
@@ -316,7 +362,7 @@ public class Runner extends TimerTask {
         table.getTableHeader().setOpaque(false);
 
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setPreferredSize(new Dimension(299, 250));
+        scrollPane.setPreferredSize(new Dimension(299, 280));
 
         statusFrame.add(scrollPane, BorderLayout.CENTER);
 

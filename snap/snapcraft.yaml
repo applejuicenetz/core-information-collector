@@ -2,7 +2,7 @@ name: applejuice-collector
 title: appleJuice Collector
 summary: appleJuice Collector for appleJuice Client
 description: appleJuice Collector for appleJuice Client
-version: 3.0.4
+version: 3.1.0
 icon: snap/gui/applejuice-collector.png
 license: MIT
 grade: stable

@@ -1,0 +1,9 @@
+[Desktop Entry]
+Version=1.0
+Name=AJCollector
+Comment=appleJuice Collector
+Exec=AJCollector
+Icon=org.applejuicenetz.collector
+Type=Application
+Categories=Java;Network;
+StartupWMClass=AJCollector

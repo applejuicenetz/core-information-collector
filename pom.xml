@@ -10,6 +10,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <github.owner>applejuicenetz</github.owner>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
     <distributionManagement>
@@ -74,6 +75,33 @@
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.6.1</version>
+                <executions>
+                    <execution>
+                        <id>stage-jpackage-input</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${project.groupId}</groupId>
+                                    <artifactId>${project.artifactId}</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${project.build.directory}/jpackage-input</outputDirectory>
+                                    <destFileName>AJCollector.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.2.0</version>
                 <configuration>
@@ -91,32 +119,55 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>io.github.fvarrui</groupId>
-                <artifactId>javapackager</artifactId>
-                <version>1.6.2</version>
+                <groupId>com.github.akman</groupId>
+                <artifactId>jlink-maven-plugin</artifactId>
+                <version>0.1.11</version>
                 <executions>
                     <execution>
-                        <id>javapackager.mac</id>
-                        <phase>package</phase>
+                        <phase>verify</phase>
                         <goals>
-                            <goal>package</goal>
+                            <goal>jlink</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <addmodules>
+                        <addmodule>java.base</addmodule>
+                        <addmodule>java.desktop</addmodule>
+                        <addmodule>java.management</addmodule>
+                        <addmodule>java.naming</addmodule>
+                        <addmodule>java.sql</addmodule>
+                        <addmodule>java.xml</addmodule>
+                    </addmodules>
+                    <noheaderfiles>true</noheaderfiles>
+                    <nomanpages>true</nomanpages>
+                    <compress>
+                        <compression>ZIP</compression>
+                    </compress>
+                    <stripdebug>true</stripdebug>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>com.github.akman</groupId>
+                <artifactId>jpackage-maven-plugin</artifactId>
+                <version>0.1.5</version>
+                <executions>
+                    <execution>
+                        <id>mac-dmg</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>jpackage</goal>
                         </goals>
                         <configuration>
+                            <runtimeimage>${project.build.directory}/jlink/image</runtimeimage>
+                            <type>DMG</type>
                             <name>AJCollector</name>
-                            <displayName>AJCollector</displayName>
-                            <organizationName>appleJuiceNETZ</organizationName>
-                            <mainClass>de.applejuicenet.collector.Runner</mainClass>
-                            <bundleJre>false</bundleJre>
-                            <platform>mac</platform>
-                            <jreMinVersion>11</jreMinVersion>
-                            <copyDependencies>false</copyDependencies>
-                            <runnableJar>${project.build.directory}/${project.build.finalName}.jar</runnableJar>
-                            <macConfig>
-                                <appId>de.applejuicenet.collector</appId>
-                                <generateDmg>true</generateDmg>
-                                <generatePkg>false</generatePkg>
-                                <volumeName>${project.build.finalName}</volumeName>
-                            </macConfig>
+                            <vendor>appleJuiceNETZ</vendor>
+                            <mainclass>de.applejuicenet.collector.Runner</mainclass>
+                            <mainjar>AJCollector.jar</mainjar>
+                            <icon>assets/mac/AJCollector.icns</icon>
+                            <input>${project.build.directory}/jpackage-input</input>
+                            <dest>${project.build.directory}</dest>
                         </configuration>
                     </execution>
                 </executions>

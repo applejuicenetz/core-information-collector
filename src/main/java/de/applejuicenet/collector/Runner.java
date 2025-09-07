@@ -85,17 +85,6 @@ public class Runner extends TimerTask {
         run();
 
         if (!GraphicsEnvironment.isHeadless()) {
-            if (System.getProperty("os.name").toLowerCase().contains("linux")) {
-                try {
-                    Toolkit xToolkit = Toolkit.getDefaultToolkit();
-                    java.lang.reflect.Field awtAppClassNameField = xToolkit.getClass().getDeclaredField("awtAppClassName");
-                    awtAppClassNameField.setAccessible(true);
-                    awtAppClassNameField.set(xToolkit, "AJCollector");
-                } catch (Exception e) {
-                    Logger.error(e);
-                }
-            }
-
             buildStatusFrame();
         }
 

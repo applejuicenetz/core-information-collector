@@ -1,5 +1,9 @@
 # Changelog
 
+# 3.1.1
+
+- Timeouts für HTTP Requests zum Core auf 5 Sekunden gesetzt
+
 # 3.1.0
 
 - die Werte `shareFiles` und `shareSize` sind nun als replacer und im json payload vorhanden

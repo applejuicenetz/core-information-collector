@@ -71,7 +71,7 @@ public class TaskbarAndTray implements ActionListener {
     }
 
     public void setToolTip(String tooltip) {
-        if (runner.config.isTrayIcon()) {
+        if (runner.config.isTrayIcon() && trayIcon != null) {
             trayIcon.setToolTip(tooltip);
         }
     }

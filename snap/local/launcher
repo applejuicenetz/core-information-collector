@@ -2,4 +2,4 @@
 
 cd $SNAP/app/
 
-java -jar AJCollector.jar "${@}"
+java -Djava.net.preferIPv4Stack=true -Dsun.java2d.xrender=false -jar AJCollector.jar "${@}"

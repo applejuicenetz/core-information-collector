@@ -1,6 +1,6 @@
 # Changelog
 
-# 3.1.1
+# 3.1.X (not released yet)
 
 - Timeouts für HTTP Requests zum Core auf 5 Sekunden gesetzt
 

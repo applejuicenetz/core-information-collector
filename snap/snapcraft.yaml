@@ -12,7 +12,6 @@ base: core22
 
 architectures:
   - build-on: amd64
-  - build-on: armhf
   - build-on: arm64
 
 layout:

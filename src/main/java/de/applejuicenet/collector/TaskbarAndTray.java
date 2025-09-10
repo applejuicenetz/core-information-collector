@@ -35,10 +35,6 @@ public class TaskbarAndTray implements ActionListener {
         if (runner.config.isTaskBarIcon() && Taskbar.isTaskbarSupported()) {
             final Taskbar taskbar = Taskbar.getTaskbar();
 
-            if (taskbar.isSupported(Taskbar.Feature.ICON_IMAGE)) {
-                taskbar.setIconImage(Runner.appLogo.getImage());
-            }
-
             if (taskbar.isSupported(Taskbar.Feature.MENU)) {
                 taskbar.setMenu(menu);
             }
@@ -50,7 +46,7 @@ public class TaskbarAndTray implements ActionListener {
             try {
                 BufferedImage trayIconImage = ImageIO.read(getClass().getResource("/resources/icon.png"));
                 int trayIconWidth = new TrayIcon(trayIconImage).getSize().width;
-                trayIcon = new TrayIcon(trayIconImage.getScaledInstance(trayIconWidth, -1, Image.SCALE_SMOOTH), runner.APP_NAME, menu);
+                trayIcon = new TrayIcon(trayIconImage.getScaledInstance(trayIconWidth, -1, Image.SCALE_SMOOTH), Runner.APP_NAME, menu);
 
                 trayIcon.addMouseListener(new java.awt.event.MouseAdapter() {
 

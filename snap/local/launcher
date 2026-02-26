@@ -1,5 +1,0 @@
-#!/bin/sh
-
-cd $SNAP/app/
-
-java -Djava.net.preferIPv4Stack=true -Dsun.java2d.xrender=false -jar AJCollector.jar "${@}"

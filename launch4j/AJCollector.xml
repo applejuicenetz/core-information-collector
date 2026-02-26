@@ -15,10 +15,10 @@
         <mutexName>AJCollector</mutexName>
     </singleInstance>
     <jre>
-        <path>Java</path>
+        <path>Java;runtime;%JAVA_HOME%;%PATH%</path>
         <bundledJreAsFallback>false</bundledJreAsFallback>
-        <minVersion>11</minVersion>
+        <minVersion>21</minVersion>
         <jdkPreference>preferJre</jdkPreference>
-        <runtimeBits>32</runtimeBits>
+        <requiresJdk>false</requiresJdk>
     </jre>
 </launch4jConfig>

@@ -4,10 +4,6 @@
 ![](https://img.shields.io/github/downloads/applejuicenetz/collector/total)
 ![](https://img.shields.io/github/license/applejuicenetz/collector.svg)
 
-![](https://github.com/applejuicenetz/collector/actions/workflows/container.yml/badge.svg)
-![](https://img.shields.io/docker/pulls/applejuicenetz/collector)
-![](https://img.shields.io/docker/image-size/applejuicenetz/collector)
-
 ![](https://github.com/applejuicenetz/collector/actions/workflows/snapcraft.yml/badge.svg)
 ![](https://snapcraft.io/applejuice-collector/badge.svg)
 

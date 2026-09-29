@@ -166,12 +166,12 @@ jobs:
           distribution: zulu
           java-version: '25'
           cache: maven
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           pattern: native-*
           merge-multiple: true
           path: target
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           pattern: flatpak-*
           merge-multiple: true

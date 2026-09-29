@@ -1,0 +1,56 @@
+id: io.github.applejuicenetz.collector
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+command: ajcollector
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk25
+build-options:
+  no-debuginfo: true
+finish-args:
+  - --share=network
+  - --socket=x11
+  - --filesystem=~/appleJuice:create
+  - --env=AJ_COLLECTOR_DISABLE_UPDATE_CHECK=yes
+  - --env=PATH=/app/jre/bin:/app/bin:/usr/bin
+  - --env=JAVA_HOME=/app/jre
+modules:
+  - name: openjdk
+    buildsystem: simple
+    build-commands:
+      - /usr/lib/sdk/openjdk25/install.sh
+  - name: binary
+    buildsystem: simple
+    build-commands:
+      - install -Dm644 AJCollector.jar /app/share/io.github.applejuicenetz.collector/AJCollector.jar
+    sources:
+      - type: file
+        path: ../target/AJCollector.jar
+  - name: starter
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 io.github.applejuicenetz.collector.sh /app/bin/ajcollector
+    sources:
+      - type: file
+        path: collector/io.github.applejuicenetz.collector.sh
+  - name: icon
+    buildsystem: simple
+    build-commands:
+      - install -Dm644 AJCollector.png /app/share/icons/hicolor/512x512/apps/io.github.applejuicenetz.collector.png
+    sources:
+      - type: file
+        path: ../assets/AJCollector.png
+  - name: desktop-file
+    buildsystem: simple
+    build-commands:
+      - install -Dm644 io.github.applejuicenetz.collector.desktop /app/share/applications/io.github.applejuicenetz.collector.desktop
+    sources:
+      - type: file
+        path: collector/io.github.applejuicenetz.collector.desktop
+  - name: metainfo
+    buildsystem: simple
+    build-commands:
+      - install -Dm644 io.github.applejuicenetz.collector.metainfo.xml /app/share/metainfo/io.github.applejuicenetz.collector.metainfo.xml
+    sources:
+      - type: file
+        path: collector/io.github.applejuicenetz.collector.metainfo.xml

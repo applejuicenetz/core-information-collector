@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Name=appleJuice Collector
+GenericName=Stats Collector for appleJuice Core
+GenericName[de]=Stats Collector für appleJuice Core
+Comment=appleJuice Core Stats Collector
+Exec=ajcollector
+Icon=io.github.applejuicenetz.collector
+Type=Application
+Terminal=false
+Categories=Network;
+StartupWMClass=AJCollector

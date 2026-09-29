@@ -95,8 +95,69 @@ jobs:
           path: target/AJCollector-${{ matrix.platform }}-${{ matrix.arch }}.${{ matrix.type }}
           if-no-files-found: error
 
+  flatpak:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            arch: x86_64
+            package-arch: amd64
+          - runner: ubuntu-24.04-arm
+            arch: aarch64
+            package-arch: aarch64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: zulu
+          java-version: '25'
+          cache: maven
+      - name: Install Flatpak builder
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends flatpak flatpak-builder
+          flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
+      - name: Build JAR and Flatpak bundle
+        shell: bash
+        env:
+          FLATPAK_ARCH: ${{ matrix.arch }}
+          PACKAGE_ARCH: ${{ matrix.package-arch }}
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
+            mvn -B versions:set -DnewVersion="${GITHUB_REF_NAME#v}" -DgenerateBackupPoms=false
+          fi
+          mvn -B package
+          version="$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)"
+          release_date="$(date -u +%F)"
+          sed -i -E "s|<release version=\"[^\"]+\" type=\"stable\" date=\"[^\"]+\"/>|<release version=\"$version\" type=\"stable\" date=\"$release_date\"/>|" \
+            flatpak/collector/io.github.applejuicenetz.collector.metainfo.xml
+          flatpak-builder \
+            --arch="$FLATPAK_ARCH" \
+            --user \
+            --install-deps-from=flathub \
+            --disable-rofiles-fuse \
+            --force-clean \
+            --repo=target/flatpak-repo \
+            --default-branch=stable \
+            target/flatpak-build \
+            flatpak/io.github.applejuicenetz.collector.yaml
+          flatpak build-bundle \
+            --arch="$FLATPAK_ARCH" \
+            --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo \
+            target/flatpak-repo \
+            "target/AJCollector-linux-${PACKAGE_ARCH}.flatpak" \
+            io.github.applejuicenetz.collector stable
+      - uses: actions/upload-artifact@v4
+        with:
+          name: flatpak-${{ matrix.package-arch }}
+          path: target/AJCollector-linux-${{ matrix.package-arch }}.flatpak
+          if-no-files-found: error
+
   release:
-    needs: package
+    needs: [package, flatpak]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -110,7 +171,12 @@ jobs:
           pattern: native-*
           merge-multiple: true
           path: target
-      - name: Check all four installers
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: flatpak-*
+          merge-multiple: true
+          path: target
+      - name: Check all six packages
         shell: bash
         run: |
           set -euo pipefail
@@ -118,15 +184,18 @@ jobs:
             AJCollector-macos-amd64.dmg \
             AJCollector-macos-aarch64.dmg \
             AJCollector-windows-amd64.exe \
-            AJCollector-windows-aarch64.exe; do
+            AJCollector-windows-aarch64.exe \
+            AJCollector-linux-amd64.flatpak \
+            AJCollector-linux-aarch64.flatpak; do
             test -s "target/$file"
           done
       - uses: actions/upload-artifact@v4
         with:
-          name: AJCollector-native-packages
+          name: AJCollector-packages
           path: |
             target/*.dmg
             target/*.exe
+            target/*.flatpak
           if-no-files-found: error
       - name: Publish JAR to GitHub Packages
         if: github.ref_type == 'tag'
@@ -148,3 +217,5 @@ jobs:
             target/AJCollector-macos-aarch64.dmg
             target/AJCollector-windows-amd64.exe
             target/AJCollector-windows-aarch64.exe
+            target/AJCollector-linux-amd64.flatpak
+            target/AJCollector-linux-aarch64.flatpak

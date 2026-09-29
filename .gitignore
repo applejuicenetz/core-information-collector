@@ -1,5 +1,6 @@
 .idea
 *.iml
 target/
+.flatpak-builder/
 *.log
 collector.xml

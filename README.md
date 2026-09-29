@@ -25,7 +25,7 @@ als `stdOut` ausgegeben.
 | macOS | [amd64 und aarch64 (`.dmg`)](https://github.com/applejuicenetz/collector/releases) |
 | Linux | Wird separat über Flatpak bereitgestellt. |
 
-Die [Release-Pipeline](.github/workflows/release.yml) baut die vier nativen Installer mit JDK 25 `jpackage` auf den jeweiligen GitHub-Runnern. Im Release-Job liegen alle vier Dateien zusammen in `target/`; bei manueller Ausführung stehen sie auch als Actions-Artefakt `AJCollector-native-packages` bereit.
+Die [Release-Pipeline](.github/workflows/release.yml) baut vier native Installer mit JDK 25 `jpackage` und zwei Flatpak-Bundles aus dem [lokalen Collector-Manifest](flatpak/io.github.applejuicenetz.collector.yaml). Die Linux-Bundles werden nativ für x86_64 und aarch64 gebaut; beide enthalten die für Java 25 benötigte Laufzeit. Im Release-Job liegen alle sechs Dateien zusammen in `target/`; bei manueller Ausführung stehen sie als Actions-Artefakt `AJCollector-packages` bereit. Das gemeinsame signierte Flatpak-Repository wird weiterhin separat im [flatpak-Repo](https://github.com/applejuicenetz/flatpak) veröffentlicht.
 
 ## Changelog
 

@@ -78,7 +78,7 @@ jobs:
             --main-jar AJCollector.jar
             --main-class de.applejuicenet.collector.Runner
             --add-modules java.desktop,java.management,java.naming,java.sql,java.xml,jdk.crypto.ec,jdk.unsupported
-            --java-options=--enable-native-access=ALL-UNNAMED
+            --java-options --enable-native-access=ALL-UNNAMED
             --dest target/jpackage-output
           )
           if [[ "$PACKAGE_PLATFORM" == macos ]]; then

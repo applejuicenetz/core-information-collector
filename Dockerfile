@@ -1,4 +1,4 @@
-FROM docker.io/eclipse-temurin:17-jre-jammy
+FROM docker.io/eclipse-temurin:25-jre-jammy
 
 ARG VERSION
 

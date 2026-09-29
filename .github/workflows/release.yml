@@ -210,6 +210,7 @@ jobs:
         uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
+          body: aktuelles Changelog befindet sich [hier](https://github.com/applejuicenetz/collector/blob/${{ github.ref_name }}/CHANGELOG.md#changelog)
           fail_on_unmatched_files: true
           files: |
             target/AJCollector.jar

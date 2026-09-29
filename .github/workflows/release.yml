@@ -89,7 +89,7 @@ jobs:
           jpackage "${options[@]}"
           mv "target/jpackage-output/AJCollector-${version}.${PACKAGE_TYPE}" "target/AJCollector-${PACKAGE_PLATFORM}-${PACKAGE_ARCH}.${PACKAGE_TYPE}"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: native-${{ matrix.platform }}-${{ matrix.arch }}
           path: target/AJCollector-${{ matrix.platform }}-${{ matrix.arch }}.${{ matrix.type }}
@@ -150,7 +150,7 @@ jobs:
             target/flatpak-repo \
             "target/AJCollector-linux-${PACKAGE_ARCH}.flatpak" \
             io.github.applejuicenetz.collector stable
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: flatpak-${{ matrix.package-arch }}
           path: target/AJCollector-linux-${{ matrix.package-arch }}.flatpak
@@ -166,12 +166,12 @@ jobs:
           distribution: zulu
           java-version: '25'
           cache: maven
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           pattern: native-*
           merge-multiple: true
           path: target
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v7
         with:
           pattern: flatpak-*
           merge-multiple: true
@@ -189,7 +189,7 @@ jobs:
             AJCollector-linux-aarch64.flatpak; do
             test -s "target/$file"
           done
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: AJCollector-packages
           path: |

@@ -19,9 +19,9 @@ als `stdOut` ausgegeben.
 |-----------|--------|
 | Windows | [amd64 und aarch64 (`.exe`)](https://github.com/applejuicenetz/collector/releases) |
 | macOS | [amd64 und aarch64 (`.dmg`)](https://github.com/applejuicenetz/collector/releases) |
-| Linux | Wird separat über Flatpak bereitgestellt. |
+| Linux | [amd64 und aarch64 (`.flatpak`)](https://github.com/applejuicenetz/collector/releases); alternativ über das [Flatpak-Repository](https://github.com/applejuicenetz/flatpak) |
 
-Die [Release-Pipeline](.github/workflows/release.yml) baut vier native Installer mit JDK 25 `jpackage` und zwei Flatpak-Bundles aus dem [lokalen Collector-Manifest](flatpak/io.github.applejuicenetz.collector.yaml). Die Linux-Bundles werden nativ für x86_64 und aarch64 gebaut; beide enthalten die für Java 25 benötigte Laufzeit. Im Release-Job liegen alle sechs Dateien zusammen in `target/`; bei manueller Ausführung stehen sie als Actions-Artefakt `AJCollector-packages` bereit. Das gemeinsame signierte Flatpak-Repository wird weiterhin separat im [flatpak-Repo](https://github.com/applejuicenetz/flatpak) veröffentlicht.
+Die [Release-Pipeline](.github/workflows/release.yml) baut vier native Installer mit JDK 25 `jpackage` und zwei Flatpak-Bundles aus dem [lokalen Collector-Manifest](flatpak/io.github.applejuicenetz.collector.yaml). Die Linux-Bundles werden nativ für x86_64 und aarch64 gebaut; beide enthalten die für Java 25 benötigte Laufzeit. Im Release-Job liegen alle sechs Dateien zusammen in `target/`; bei manueller Ausführung stehen sie als Actions-Artefakt `AJCollector-packages` bereit. Nur das gemeinsame signierte Flatpak-Repository für mehrere appleJuice-Programme wird weiterhin separat im [flatpak-Repo](https://github.com/applejuicenetz/flatpak) veröffentlicht.
 
 ## Changelog
 

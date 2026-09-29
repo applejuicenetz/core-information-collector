@@ -3,6 +3,7 @@
 # 4.0.0
 
 - build with Java 25
+- Native Pakete für Windows, macOS und Linux (Flatpak), jeweils für amd64 und aarch64 gebaut; alle enthalten die Java-25-Laufzeit, sodass keine separate Java-Installation nötig ist
 - Konfigurationsdatei von `core-information-collector.xml` zu `collector.xml` umbenannt; eine vorhandene alte Datei wird beim Start automatisch übernommen
 - Timeouts für HTTP Requests zum Core auf 5 Sekunden gesetzt
 

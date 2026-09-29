@@ -3,6 +3,7 @@
 # 4.0.0
 
 - build with Java 25
+- Konfigurationsdatei von `core-information-collector.xml` zu `collector.xml` umbenannt; eine vorhandene alte Datei wird beim Start automatisch übernommen
 - Timeouts für HTTP Requests zum Core auf 5 Sekunden gesetzt
 
 # 3.1.0

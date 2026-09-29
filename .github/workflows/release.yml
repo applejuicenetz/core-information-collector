@@ -9,14 +9,14 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Inject JDK
         id: inject_jdk
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: 'zulu'
-          java-version: 21
+          java-version: 25
 
       - name: update mvn version
         id: update_mvn_package
@@ -24,7 +24,7 @@ jobs:
 
       - name: commit updated package_version
         id: commit_updated_package_version
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           branch: master
           file_pattern: pom.xml

@@ -1,64 +1,64 @@
 # Changelog
 
-# 4.0.0
+## 4.0.0
 
-- build with Java 25
-- Native Pakete für Windows, macOS und Linux (Flatpak), jeweils für amd64 und aarch64 gebaut; alle enthalten die Java-25-Laufzeit, sodass keine separate Java-Installation nötig ist
-- Konfigurationsdatei von `core-information-collector.xml` zu `collector.xml` umbenannt; eine vorhandene alte Datei wird beim Start automatisch übernommen
-- Timeouts für HTTP Requests zum Core auf 5 Sekunden gesetzt
+- Mit Java 25 gebaut.
+- Native Pakete für Windows und macOS sowie Flatpak-Bundles für Linux werden jeweils für `amd64` und `aarch64` auf der passenden Architektur erstellt. Alle Pakete enthalten eine Java-25-Laufzeit; eine separate Java-Installation ist nicht erforderlich.
+- Die Konfigurationsdatei wurde von `core-information-collector.xml` zu `collector.xml` umbenannt. Eine vorhandene Datei mit altem Namen wird beim Start automatisch übernommen.
+- Zeitüberschreitung für HTTP-Anfragen an den Core auf fünf Sekunden gesetzt.
 
-# 3.1.0
+## 3.1.0
 
-- die Werte `shareFiles` und `shareSize` sind nun als replacer und im json payload vorhanden
+- Die Werte `shareFiles` und `shareSize` stehen nun als Platzhalter und in der JSON-Nutzlast zur Verfügung.
 
-# 3.0.4
+## 3.0.4
 
-- die veraltete Collector URL `5f297e.online-server.cloud` mit `discord.applejuicenet.cc` ersetzt (nun in allen Fällen und mit Log Ausgabe)
+- Die veraltete Collector-URL `5f297e.online-server.cloud` wird nun in allen Fällen durch `discord.applejuicenet.cc` ersetzt. Dabei wird eine Logmeldung ausgegeben.
 
-# 3.0.3
+## 3.0.3
 
-- die veraltete Collector URL `5f297e.online-server.cloud` mit `discord.applejuicenet.cc` ersetzt
+- Die veraltete Collector-URL `5f297e.online-server.cloud` wurde durch `discord.applejuicenet.cc` ersetzt.
 
-# 3.0.2
+## 3.0.2
 
-- `config` menu item zum TaskBar icon hinzugefügt welches die XML Datei direkt öffnet (kein suchen mehr)
+- Menüpunkt `config` zum Taskleisten-Symbol hinzugefügt; er öffnet die XML-Datei direkt.
 
-# 3.0.1
+## 3.0.1
 
-- WM_CLASS für Linux korrekt gesetzt
-- Umgebungsvariable `AJ_COLLECTOR_DISABLE_UPDATE_CHECK` mit dem Wert `yes` schaltet die Version prüfung ab
+- `WM_CLASS` unter Linux korrigiert.
+- Die Umgebungsvariable `AJ_COLLECTOR_DISABLE_UPDATE_CHECK` mit dem Wert `yes` deaktiviert die Versionsprüfung.
 
-# 3.0.0
+## 3.0.0
 
-- Minimum Java 11 JRE erforderlich
-- TaskBar Support für jedes OS
-- `intervall` config wird nun auch wirklich benutzt ;)
-- Status Frame updates nach intervall
-- Linux Snap verfügbar
-- ordner für config file wird beim ersten start nun auch angelegt..
-- CHANGELOG :D
+- Mindestens Java 11 als Laufzeitumgebung (JRE) erforderlich.
+- Taskleisten-Unterstützung für alle Betriebssysteme hinzugefügt.
+- Die Einstellung `intervall` wird nun berücksichtigt.
+- Das Statusfenster wird gemäß dem konfigurierten Intervall aktualisiert.
+- Snap-Paket für Linux verfügbar.
+- Der Konfigurationsordner wird beim ersten Start angelegt.
+- Änderungsprotokoll hinzugefügt.
 
-# 2.1.4
+## 2.1.4
 
-- neues icon
-- windows exe nutzt `Java` Ordner
-- config file wird beim ersten start nun auch wirklich angelegt
+- Neues Icon.
+- Die Windows-EXE verwendet den `Java`-Ordner.
+- Die Konfigurationsdatei wird beim ersten Start angelegt.
 
-# 2.1.3
+## 2.1.3
 
-- beende anwendung bei schweren fehlern in der config
+- Die Anwendung wird bei schwerwiegenden Konfigurationsfehlern beendet.
 
-# 2.1.2
+## 2.1.2
 
-- config als xml -> mehrere target möglich
-- native osx app via javapackager
+- Konfiguration auf XML umgestellt; mehrere Ziele sind möglich.
+- Native macOS-App mit `javapackager` erstellt.
 
-# 2.0.3
+## 2.0.3
 
-- stdOut zeigt version beim starten
-- status fenster hinzugefügt
-- payload als json
+- Die Version wird beim Start auf der Standardausgabe (`stdout`) angezeigt.
+- Statusfenster hinzugefügt.
+- Nutzlast im JSON-Format.
 
-# 1.X
+## 1.X
 
-- initial release
+- Erste Veröffentlichung.

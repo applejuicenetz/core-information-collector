@@ -2,4 +2,4 @@
 *.iml
 target/
 *.log
-core-information-collector.xml
+collector.xml

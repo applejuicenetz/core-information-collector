@@ -1,14 +1,14 @@
 # appleJuice Collector
 
-![](https://img.shields.io/github/v/release/applejuicenetz/core-information-collector.svg)
-![](https://img.shields.io/github/downloads/applejuicenetz/core-information-collector/total)
-![](https://img.shields.io/github/license/applejuicenetz/core-information-collector.svg)
+![](https://img.shields.io/github/v/release/applejuicenetz/collector.svg)
+![](https://img.shields.io/github/downloads/applejuicenetz/collector/total)
+![](https://img.shields.io/github/license/applejuicenetz/collector.svg)
 
-![](https://github.com/applejuicenetz/core-information-collector/actions/workflows/container.yml/badge.svg)
-![](https://img.shields.io/docker/pulls/applejuicenetz/core-information-collector)
-![](https://img.shields.io/docker/image-size/applejuicenetz/core-information-collector)
+![](https://github.com/applejuicenetz/collector/actions/workflows/container.yml/badge.svg)
+![](https://img.shields.io/docker/pulls/applejuicenetz/collector)
+![](https://img.shields.io/docker/image-size/applejuicenetz/collector)
 
-![](https://github.com/applejuicenetz/core-information-collector/actions/workflows/snapcraft.yml/badge.svg)
+![](https://github.com/applejuicenetz/collector/actions/workflows/snapcraft.yml/badge.svg)
 ![](https://snapcraft.io/applejuice-collector/badge.svg)
 
 Dieses kleine Tool holt die Informationen von deinem Core (siehe unten `Platzhalter`) und leitet diese aufbereitet an
@@ -19,11 +19,13 @@ als `stdOut` ausgegeben.
 
 ## Installation
 
-| Platform 	 | Link          	                                                                          |
-|------------|------------------------------------------------------------------------------------------|
-| Windows  	 | [setup.exe](https://github.com/applejuicenetz/core-information-collector/releases)   	   |
-| macOS    	 | [AJCollector.dmg](https://github.com/applejuicenetz/core-information-collector/releases) |
-| Linux    	 | [Snap Package](https://snapcraft.io/applejuice-collector)	                               |
+| Plattform | Pakete |
+|-----------|--------|
+| Windows | [amd64 und aarch64 (`.exe`)](https://github.com/applejuicenetz/collector/releases) |
+| macOS | [amd64 und aarch64 (`.dmg`)](https://github.com/applejuicenetz/collector/releases) |
+| Linux | Wird separat über Flatpak bereitgestellt. |
+
+Die [Release-Pipeline](.github/workflows/release.yml) baut die vier nativen Installer mit JDK 25 `jpackage` auf den jeweiligen GitHub-Runnern. Im Release-Job liegen alle vier Dateien zusammen in `target/`; bei manueller Ausführung stehen sie auch als Actions-Artefakt `AJCollector-native-packages` bereit.
 
 ## Changelog
 
@@ -31,7 +33,7 @@ Ein aktuelles Changelog befindet sich [hier](CHANGELOG.md)
 
 ## Konfiguration
 
-Die Konfiguration erfolgt mittels XML Datei `core-information-collector.xml`
+Die Konfiguration erfolgt mittels XML Datei `collector.xml`. Eine vorhandene Datei mit dem bisherigen Namen wird beim ersten Start automatisch umbenannt.
 
 Diese kannst du öffnen, in dem du den Collector startest und per rechtsklick den Menüpunkt `config` auswählst.
 
@@ -62,7 +64,7 @@ Endpunkte weiterzuleiten.
 
 ## Beispiel XML
 
-Inhalt der `core-information-collector.xml` Datei
+Inhalt der `collector.xml` Datei
 
 ```xml
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
@@ -138,10 +140,10 @@ version: '2.4'
 services:
   applejuice_collector:
     container_name: applejuice_collector
-    image: ghcr.io/applejuicenetz/core-information-collector:latest
+    image: ghcr.io/applejuicenetz/collector:latest
     network_mode: bridge
     restart: always
     mem_limit: 64MB
     volumes:
-      - ~/applejuice/core-information-collector.xml:/app/appleJuice/collector/core-information-collector.xml
+      - ~/applejuice/collector.xml:/app/appleJuice/collector/collector.xml
 ```

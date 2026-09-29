@@ -7,7 +7,7 @@
     </envs>
     <option name="INCLUDE_PROVIDED_SCOPE" value="true" />
     <option name="MAIN_CLASS_NAME" value="de.applejuicenet.collector.Runner" />
-    <module name="core-information-collector" />
+    <module name="collector" />
     <extension name="net.ashald.envfile">
       <option name="IS_ENABLED" value="false" />
       <option name="IS_SUBST" value="false" />

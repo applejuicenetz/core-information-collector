@@ -1,7 +1,8 @@
 # Changelog
 
-# 3.1.X (not released yet)
+# 4.0.0
 
+- build with Java 25
 - Timeouts für HTTP Requests zum Core auf 5 Sekunden gesetzt
 
 # 3.1.0

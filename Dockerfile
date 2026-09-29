@@ -1,10 +1,10 @@
-FROM docker.io/eclipse-temurin:17-jre-jammy
+FROM docker.io/eclipse-temurin:25-jre-alpine
 
 ARG VERSION
 
 RUN mkdir /app
 
-ADD https://github.com/applejuicenetz/core-information-collector/releases/download/${VERSION}/AJCollector.jar /app/AJCollector.jar
+ADD https://github.com/applejuicenetz/collector/releases/download/${VERSION}/AJCollector.jar /app/AJCollector.jar
 
 WORKDIR /app
 

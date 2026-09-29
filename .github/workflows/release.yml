@@ -1,86 +1,150 @@
-name: 'release'
+name: release
 
 on:
-  create:
+  push:
     tags:
+      - '*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
 
 jobs:
-  release:
-    runs-on: macos-latest
+  package:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-15-intel
+            platform: macos
+            arch: amd64
+            type: dmg
+          - runner: macos-15
+            platform: macos
+            arch: aarch64
+            type: dmg
+          - runner: windows-2025
+            platform: windows
+            arch: amd64
+            type: exe
+          - runner: windows-11-arm
+            platform: windows
+            arch: aarch64
+            type: exe
+    runs-on: ${{ matrix.runner }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      - name: Inject JDK
-        id: inject_jdk
-        uses: actions/setup-java@v6
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
-          distribution: 'zulu'
-          java-version: 25
+          distribution: zulu
+          java-version: '25'
+          cache: maven
 
-      - name: update mvn version
-        id: update_mvn_package
-        run: mvn versions:set -DnewVersion=${{ github.ref_name }}
-
-      - name: commit updated package_version
-        id: commit_updated_package_version
-        uses: stefanzweifel/git-auto-commit-action@v7
+      - uses: actions/setup-dotnet@v6
+        if: matrix.platform == 'windows'
         with:
-          branch: master
-          file_pattern: pom.xml
-          commit_message: Update mvn Package Version to ${{ github.ref_name }}
+          dotnet-version: '8.0.x'
+      - name: Install WiX for jpackage
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix --version 5.0.2
+          "$env:USERPROFILE\.dotnet\tools" >> $env:GITHUB_PATH
+          & "$env:USERPROFILE\.dotnet\tools\wix.exe" extension add --global WixToolset.UI.wixext/5.0.2
+          & "$env:USERPROFILE\.dotnet\tools\wix.exe" extension add --global WixToolset.Util.wixext/5.0.2
 
-      - name: Build Packages
-        id: mvn_package
-        run: mvn package
+      - name: Build JAR and native installer
+        shell: bash
+        env:
+          PACKAGE_PLATFORM: ${{ matrix.platform }}
+          PACKAGE_ARCH: ${{ matrix.arch }}
+          PACKAGE_TYPE: ${{ matrix.type }}
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
+            mvn -B versions:set -DnewVersion="${GITHUB_REF_NAME#v}" -DgenerateBackupPoms=false
+          fi
+          mvn -B package
+          version="$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)"
+          mkdir -p target/jpackage-input target/jpackage-output
+          cp target/AJCollector.jar target/jpackage-input/
+          options=(
+            --type "$PACKAGE_TYPE"
+            --name AJCollector
+            --app-version "$version"
+            --vendor appleJuiceNETZ
+            --input target/jpackage-input
+            --main-jar AJCollector.jar
+            --main-class de.applejuicenet.collector.Runner
+            --add-modules java.desktop,java.management,java.naming,java.sql,java.xml,jdk.crypto.ec,jdk.unsupported
+            --java-options=--enable-native-access=ALL-UNNAMED
+            --dest target/jpackage-output
+          )
+          if [[ "$PACKAGE_PLATFORM" == macos ]]; then
+            options+=(--icon assets/mac/AJCollector.icns --mac-package-identifier de.applejuicenet.collector)
+          else
+            options+=(--icon assets/windows/AJCollector.ico --win-menu)
+          fi
+          jpackage "${options[@]}"
+          mv "target/jpackage-output/AJCollector-${version}.${PACKAGE_TYPE}" "target/AJCollector-${PACKAGE_PLATFORM}-${PACKAGE_ARCH}.${PACKAGE_TYPE}"
 
-      - name: Publish to GitHub Packages
-        id: mvn_deploy
-        run: mvn deploy
+      - uses: actions/upload-artifact@v4
+        with:
+          name: native-${{ matrix.platform }}-${{ matrix.arch }}
+          path: target/AJCollector-${{ matrix.platform }}-${{ matrix.arch }}.${{ matrix.type }}
+          if-no-files-found: error
+
+  release:
+    needs: package
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: zulu
+          java-version: '25'
+          cache: maven
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: native-*
+          merge-multiple: true
+          path: target
+      - name: Check all four installers
+        shell: bash
+        run: |
+          set -euo pipefail
+          for file in \
+            AJCollector-macos-amd64.dmg \
+            AJCollector-macos-aarch64.dmg \
+            AJCollector-windows-amd64.exe \
+            AJCollector-windows-aarch64.exe; do
+            test -s "target/$file"
+          done
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AJCollector-native-packages
+          path: |
+            target/*.dmg
+            target/*.exe
+          if-no-files-found: error
+      - name: Publish JAR to GitHub Packages
+        if: github.ref_type == 'tag'
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
-
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          mvn -B versions:set -DnewVersion="${GITHUB_REF_NAME#v}" -DgenerateBackupPoms=false
+          mvn -B deploy
+      - name: Publish GitHub release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v3
         with:
-          tag_name: ${{ github.ref }}
-          release_name: ${{ github.ref_name }}
-          draft: false
-          prerelease: false
-          body: aktuelles Changelog befindet sich [hier](https://github.com/${{ github.repository }}/blob/master/CHANGELOG.md#changelog)
-
-      - name: upload .jar
-        id: upload-release-asset-jar
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: target/AJCollector.jar
-          asset_name: AJCollector.jar
-          asset_content_type: application/zip
-
-      - name: upload windows setup
-        id: upload-release-asset-setup
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: launch4j/AJCollector.setup.exe
-          asset_name: AJCollector.setup.exe
-          asset_content_type: application/octet-stream
-
-      - name: upload macOS .dmg
-        id: upload-release-asset-dmg
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: target/assets/AJCollector_${{github.ref_name}}.dmg
-          asset_name: AJCollector.dmg
-          asset_content_type: application/octet-stream
+          generate_release_notes: true
+          fail_on_unmatched_files: true
+          files: |
+            target/AJCollector.jar
+            target/AJCollector-macos-amd64.dmg
+            target/AJCollector-macos-aarch64.dmg
+            target/AJCollector-windows-amd64.exe
+            target/AJCollector-windows-aarch64.exe

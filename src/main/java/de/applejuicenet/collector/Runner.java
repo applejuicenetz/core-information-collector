@@ -29,8 +29,7 @@ public class Runner extends TimerTask {
 
     public final static String APP_NAME = "AJCollector";
 
-    public final static ImageIcon appIcon = new ImageIcon(Runner.class.getResource("/resources/icon.png"));
-    public final static ImageIcon appLogo = new ImageIcon(Runner.class.getResource("/resources/logo.png"));
+    public final static ImageIcon appIcon = new ImageIcon(Objects.requireNonNull(Runner.class.getResource("/resources/icon.png")));
 
     private final DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
@@ -68,6 +67,8 @@ public class Runner extends TimerTask {
     private DefaultTableModel statusModel;
 
     public static void main(String[] args) {
+        System.setProperty("apple.awt.application.name", APP_NAME);
+
         new Runner();
     }
 
@@ -329,6 +330,7 @@ public class Runner extends TimerTask {
         statusFrame.setSize(300, 280);
         statusFrame.setIconImage(appIcon.getImage());
         statusFrame.setAlwaysOnTop(true);
+        statusFrame.setDefaultCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 
         JPanel pnlButton = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
@@ -370,8 +372,21 @@ public class Runner extends TimerTask {
     }
 
     public void openStatusFrame() {
-        statusFrame.pack();
-        statusFrame.setLocationRelativeTo(null);
-        statusFrame.setVisible(true);
+        SwingUtilities.invokeLater(() -> {
+            if (statusFrame == null) {
+                return;
+            }
+
+            statusFrame.pack();
+
+            if (!statusFrame.isVisible()) {
+                statusFrame.setLocationRelativeTo(null);
+            }
+
+            statusFrame.setExtendedState(JFrame.NORMAL);
+            statusFrame.setVisible(true);
+            statusFrame.toFront();
+            statusFrame.requestFocus();
+        });
     }
 }

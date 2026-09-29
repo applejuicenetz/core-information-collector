@@ -15,13 +15,16 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 class Config {
 
-    private static final String FILENAME_XML = "core-information-collector.xml";
+    private static final String FILENAME_XML = "collector.xml";
+    private static final String LEGACY_FILENAME_XML = "core-information-collector.xml";
 
     private static final String DEFAULT_TRAYICON = "true";
     private static final String DEFAULT_TASKBARICON = "true";
@@ -48,7 +51,7 @@ class Config {
     private String corePort = DEFAULT_CORE_PORT;
     private String corePassword = DEFAULT_CORE_PASSWD;
 
-    private List<Target> targets = new ArrayList<Target>();
+    private final List<Target> targets = new ArrayList<Target>();
 
     public static File getConfigFile() {
         String rootDirectory = System.getProperty("user.home") + File.separator + "appleJuice" + File.separator + "collector";
@@ -59,7 +62,20 @@ class Config {
             aFile.mkdirs();
         }
 
-        File fileXML = new File(rootDirectory + File.separator + Config.FILENAME_XML);
+        File fileXML = new File(aFile, FILENAME_XML);
+
+        if (!fileXML.exists()) {
+            File legacyFile = new File(aFile, LEGACY_FILENAME_XML);
+
+            if (legacyFile.isFile()) {
+                try {
+                    Files.move(legacyFile.toPath(), fileXML.toPath());
+                } catch (IOException e) {
+                    Logger.error(e);
+                    return fileXML.isFile() ? fileXML : legacyFile;
+                }
+            }
+        }
 
         if (!fileXML.exists()) {
             try {
@@ -220,4 +236,3 @@ class Config {
         transformer.transform(domSource, streamResult);
     }
 }
-

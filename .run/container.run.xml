@@ -8,8 +8,8 @@
         <option name="volumeBindings">
           <list>
             <DockerVolumeBindingImpl>
-              <option name="containerPath" value="/app/appleJuice/collector/core-information-collector.xml" />
-              <option name="hostPath" value="$PROJECT_DIR$/core-information-collector.xml" />
+              <option name="containerPath" value="/app/appleJuice/collector/collector.xml" />
+              <option name="hostPath" value="$PROJECT_DIR$/collector.xml" />
             </DockerVolumeBindingImpl>
           </list>
         </option>

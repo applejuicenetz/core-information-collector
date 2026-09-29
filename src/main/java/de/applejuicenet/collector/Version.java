@@ -13,8 +13,8 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class Version {
-    private static final String GITHUB_API_URL = "https://api.github.com/repos/applejuicenetz/core-information-collector/releases/latest";
-    private static final String GITHUB_URL = "https://github.com/applejuicenetz/core-information-collector/releases";
+    private static final String GITHUB_API_URL = "https://api.github.com/repos/applejuicenetz/collector/releases/latest";
+    private static final String GITHUB_URL = "https://github.com/applejuicenetz/collector/releases";
 
     public void check4update() {
         if (Objects.equals(System.getenv("AJ_COLLECTOR_DISABLE_UPDATE_CHECK"), "yes")) {

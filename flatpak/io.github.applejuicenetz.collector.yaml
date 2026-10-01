@@ -10,6 +10,7 @@ build-options:
 finish-args:
   - --share=network
   - --socket=x11
+  - --talk-name=org.kde.StatusNotifierWatcher
   - --filesystem=~/appleJuice:create
   - --env=AJ_COLLECTOR_DISABLE_UPDATE_CHECK=yes
   - --env=PATH=/app/jre/bin:/app/bin:/usr/bin

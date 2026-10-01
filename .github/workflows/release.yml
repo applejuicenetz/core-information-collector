@@ -40,6 +40,9 @@ jobs:
           distribution: zulu
           java-version: '25'
           cache: maven
+          server-id: github
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
 
       - uses: actions/setup-dotnet@v6
         if: matrix.platform == 'windows'
@@ -57,6 +60,7 @@ jobs:
       - name: Build JAR and native installer
         shell: bash
         env:
+          GITHUB_TOKEN: ${{ github.token }}
           PACKAGE_PLATFORM: ${{ matrix.platform }}
           PACKAGE_ARCH: ${{ matrix.arch }}
           PACKAGE_TYPE: ${{ matrix.type }}
@@ -114,6 +118,9 @@ jobs:
           distribution: zulu
           java-version: '25'
           cache: maven
+          server-id: github
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
       - name: Install Flatpak builder
         run: |
           sudo apt-get update -qq
@@ -122,6 +129,7 @@ jobs:
       - name: Build JAR and Flatpak bundle
         shell: bash
         env:
+          GITHUB_TOKEN: ${{ github.token }}
           FLATPAK_ARCH: ${{ matrix.arch }}
           PACKAGE_ARCH: ${{ matrix.package-arch }}
         run: |

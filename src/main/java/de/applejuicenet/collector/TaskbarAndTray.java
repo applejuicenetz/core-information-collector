@@ -188,7 +188,8 @@ public class TaskbarAndTray implements ActionListener {
                     icon.readAllBytes(),
                     Runner.APP_NAME,
                     new TrayMenu(items),
-                    null
+                    null,
+                    "io.github.applejuicenetz.collector.StatusNotifierItem"
             );
             nativeTray = Tray.Companion.create(builder);
             if (nativeTray == null) {

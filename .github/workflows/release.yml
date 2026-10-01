@@ -254,3 +254,48 @@ jobs:
             target/AJCollector-windows-aarch64.exe
             target/AJCollector-linux-amd64.flatpak
             target/AJCollector-linux-aarch64.flatpak
+
+  update-main:
+    if: github.ref_type == 'tag'
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: main
+          fetch-depth: 0
+      - uses: actions/setup-java@v6
+        with:
+          distribution: zulu
+          java-version: '25'
+          cache: maven
+          server-id: github
+          server-username-env-var: GITHUB_ACTOR
+          server-password-env-var: GITHUB_TOKEN
+      - name: Commit released version to main
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME#v}"
+          if ! git merge-base --is-ancestor "$GITHUB_SHA" HEAD; then
+            echo "::warning::Release commit is not on main; skipping version update"
+            exit 0
+          fi
+          if ! git diff --quiet "$GITHUB_SHA" HEAD -- pom.xml flatpak/collector/io.github.applejuicenetz.collector.metainfo.xml; then
+            echo "::warning::Release metadata changed on main since this tag; skipping version update"
+            exit 0
+          fi
+          mvn -B versions:set -DnewVersion="$version" -DgenerateBackupPoms=false
+          sed -i -E "s|<release version=\"[^\"]+\" type=\"stable\" date=\"[^\"]+\"/>|<release version=\"$version\" type=\"stable\" date=\"$(date -u +%F)\"/>|" \
+            flatpak/collector/io.github.applejuicenetz.collector.metainfo.xml
+          if git diff --quiet -- pom.xml flatpak/collector/io.github.applejuicenetz.collector.metainfo.xml; then
+            echo "main already contains version $version"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add pom.xml flatpak/collector/io.github.applejuicenetz.collector.metainfo.xml
+          git commit -m "Release $version"
+          git push origin HEAD:main

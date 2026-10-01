@@ -88,7 +88,19 @@ jobs:
           if [[ "$PACKAGE_PLATFORM" == macos ]]; then
             options+=(--icon assets/mac/AJCollector.icns --mac-package-identifier de.applejuicenet.collector --resource-dir assets/mac)
           else
-            options+=(--icon assets/windows/AJCollector.ico --win-menu)
+            options+=(
+              --icon assets/windows/AJCollector.ico
+              --description "appleJuice Collector"
+              --copyright appleJuiceNETZ
+              --about-url https://applejuicenetz.github.io
+              --win-help-url https://applejuicenetz.github.io/faq/
+              --install-dir appleJuiceNETZ/Collector
+              --win-dir-chooser
+              --win-menu
+              --win-menu-group appleJuiceNETZ
+              --win-shortcut
+              --win-upgrade-uuid 6119ffb5-f01b-4162-ab46-a62d5dd16f37
+            )
           fi
           jpackage "${options[@]}"
           mv "target/jpackage-output/AJCollector-${version}.${PACKAGE_TYPE}" "target/AJCollector-${PACKAGE_PLATFORM}-${PACKAGE_ARCH}.${PACKAGE_TYPE}"

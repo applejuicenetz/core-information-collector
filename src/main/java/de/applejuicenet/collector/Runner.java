@@ -371,22 +371,34 @@ public class Runner extends TimerTask {
         }
     }
 
-    public void openStatusFrame() {
+    public void toggleStatusFrame() {
         SwingUtilities.invokeLater(() -> {
-            if (statusFrame == null) {
-                return;
+            if (statusFrame != null && statusFrame.isVisible()) {
+                statusFrame.setVisible(false);
+            } else {
+                showStatusFrame();
             }
-
-            statusFrame.pack();
-
-            if (!statusFrame.isVisible()) {
-                statusFrame.setLocationRelativeTo(null);
-            }
-
-            statusFrame.setExtendedState(JFrame.NORMAL);
-            statusFrame.setVisible(true);
-            statusFrame.toFront();
-            statusFrame.requestFocus();
         });
+    }
+
+    public void openStatusFrame() {
+        SwingUtilities.invokeLater(this::showStatusFrame);
+    }
+
+    private void showStatusFrame() {
+        if (statusFrame == null) {
+            return;
+        }
+
+        statusFrame.pack();
+
+        if (!statusFrame.isVisible()) {
+            statusFrame.setLocationRelativeTo(null);
+        }
+
+        statusFrame.setExtendedState(JFrame.NORMAL);
+        statusFrame.setVisible(true);
+        statusFrame.toFront();
+        statusFrame.requestFocus();
     }
 }

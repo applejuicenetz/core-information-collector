@@ -59,21 +59,21 @@ public class TaskbarAndTray implements ActionListener {
             SystemTray systemTray = SystemTray.getSystemTray();
 
             try {
-                trayMenu = isMacOS() ? null : createTrayMenu();
-                PopupMenu nativeTrayMenu = createMenu();
+                boolean macOS = isMacOS();
+                trayMenu = macOS ? null : createTrayMenu();
 
                 BufferedImage trayIconImage = ImageIO.read(getClass().getResource("/resources/icon.png"));
                 int trayIconWidth = new TrayIcon(trayIconImage).getSize().width;
 
-                trayIcon = new TrayIcon(trayIconImage.getScaledInstance(trayIconWidth, -1, Image.SCALE_SMOOTH), Runner.APP_NAME, nativeTrayMenu);
-                trayIcon.addActionListener(event -> runner.openStatusFrame());
-
+                trayIcon = macOS
+                        ? new TrayIcon(trayIconImage.getScaledInstance(trayIconWidth, -1, Image.SCALE_SMOOTH), Runner.APP_NAME, createMenu())
+                        : new TrayIcon(trayIconImage.getScaledInstance(trayIconWidth, -1, Image.SCALE_SMOOTH), Runner.APP_NAME);
                 trayIcon.addMouseListener(new java.awt.event.MouseAdapter() {
 
                     @Override
                     public void mouseClicked(java.awt.event.MouseEvent evt) {
-                        if (SwingUtilities.isLeftMouseButton(evt) && evt.getClickCount() == 2) {
-                            runner.openStatusFrame();
+                        if (SwingUtilities.isLeftMouseButton(evt) && !evt.isPopupTrigger()) {
+                            runner.toggleStatusFrame();
                         }
                     }
 
@@ -199,7 +199,7 @@ public class TaskbarAndTray implements ActionListener {
                 if (event instanceof TrayEvent.MenuItemSelected selected) {
                     actionPerformed(new ActionEvent(nativeTray, ActionEvent.ACTION_PERFORMED, selected.getId()));
                 } else if (event instanceof TrayEvent.Activated) {
-                    runner.openStatusFrame();
+                    runner.toggleStatusFrame();
                 }
                 return Unit.INSTANCE;
             });

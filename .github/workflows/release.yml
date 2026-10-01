@@ -41,8 +41,8 @@ jobs:
           java-version: '25'
           cache: maven
           server-id: github
-          server-username: GITHUB_ACTOR
-          server-password: GITHUB_TOKEN
+          server-username-env-var: GITHUB_ACTOR
+          server-password-env-var: GITHUB_TOKEN
 
       - uses: actions/setup-dotnet@v6
         if: matrix.platform == 'windows'
@@ -119,8 +119,8 @@ jobs:
           java-version: '25'
           cache: maven
           server-id: github
-          server-username: GITHUB_ACTOR
-          server-password: GITHUB_TOKEN
+          server-username-env-var: GITHUB_ACTOR
+          server-password-env-var: GITHUB_TOKEN
       - name: Install Flatpak builder
         run: |
           sudo apt-get update -qq

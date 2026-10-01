@@ -86,12 +86,26 @@ jobs:
             --dest target/jpackage-output
           )
           if [[ "$PACKAGE_PLATFORM" == macos ]]; then
-            options+=(--icon assets/mac/AJCollector.icns --mac-package-identifier de.applejuicenet.collector)
+            options+=(--icon assets/mac/AJCollector.icns --mac-package-identifier de.applejuicenet.collector --resource-dir assets/mac)
           else
             options+=(--icon assets/windows/AJCollector.ico --win-menu)
           fi
           jpackage "${options[@]}"
           mv "target/jpackage-output/AJCollector-${version}.${PACKAGE_TYPE}" "target/AJCollector-${PACKAGE_PLATFORM}-${PACKAGE_ARCH}.${PACKAGE_TYPE}"
+
+      - name: Verify macOS network usage description
+        if: matrix.platform == 'macos'
+        shell: bash
+        env:
+          PACKAGE_ARCH: ${{ matrix.arch }}
+        run: |
+          set -euo pipefail
+          mountpoint="$(mktemp -d)"
+          hdiutil attach -readonly -nobrowse -mountpoint "$mountpoint" "target/AJCollector-macos-${PACKAGE_ARCH}.dmg"
+          trap 'hdiutil detach "$mountpoint"' EXIT
+          plist="$mountpoint/AJCollector.app/Contents/Info.plist"
+          plutil -lint "$plist"
+          test -n "$(plutil -extract NSLocalNetworkUsageDescription raw -o - "$plist")"
 
       - uses: actions/upload-artifact@v7
         with:

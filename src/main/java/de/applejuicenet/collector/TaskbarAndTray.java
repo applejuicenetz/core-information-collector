@@ -59,7 +59,7 @@ public class TaskbarAndTray implements ActionListener {
             SystemTray systemTray = SystemTray.getSystemTray();
 
             try {
-                trayMenu = createTrayMenu();
+                trayMenu = isMacOS() ? null : createTrayMenu();
                 PopupMenu nativeTrayMenu = createMenu();
 
                 BufferedImage trayIconImage = ImageIO.read(getClass().getResource("/resources/icon.png"));
@@ -216,8 +216,12 @@ public class TaskbarAndTray implements ActionListener {
         return System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("linux");
     }
 
+    private boolean isMacOS() {
+        return System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("mac");
+    }
+
     private void showTrayMenu(java.awt.event.MouseEvent event) {
-        if (!event.isPopupTrigger() && !SwingUtilities.isRightMouseButton(event)) {
+        if (trayMenu == null || (!event.isPopupTrigger() && !SwingUtilities.isRightMouseButton(event))) {
             return;
         }
 

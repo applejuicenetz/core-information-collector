@@ -6,6 +6,8 @@
 - Native Pakete für Windows und macOS sowie Flatpak-Bundles für Linux werden jeweils für `amd64` und `aarch64` auf der passenden Architektur erstellt. Alle Pakete enthalten eine Java-25-Laufzeit; eine separate Java-Installation ist nicht erforderlich.
 - Die Konfigurationsdatei wurde von `core-information-collector.xml` zu `collector.xml` umbenannt. Eine vorhandene Datei mit altem Namen wird beim Start automatisch übernommen.
 - Zeitüberschreitung für HTTP-Anfragen an den Core auf fünf Sekunden gesetzt.
+- macOS-Pakete enthalten mit `NSLocalNetworkUsageDescription` eine Erklärung für den Zugriff auf den Core im lokalen Netzwerk.
+- Unter macOS wird nur das native Tray-Kontextmenü geöffnet; das zusätzliche Swing-Menü entfällt.
 
 ## 3.1.0
 

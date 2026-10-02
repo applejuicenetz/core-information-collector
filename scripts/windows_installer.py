@@ -45,12 +45,15 @@ def compile_guard(directory):
     source = Path(__file__).with_name('legacy_install_guard.c')
     dll = directory / 'legacy-install-guard.dll'
     probe = directory / 'legacy-install-guard-test.exe'
-    commands = [
-        f'call "{setup}" x64',
-        f'cl /nologo /W4 /WX /LD /MT "{source}" /link msi.lib advapi32.lib /OUT:"{dll}"',
-        f'cl /nologo /W4 /WX /MT /DAJ_GUARD_TEST "{source}" /link msi.lib advapi32.lib /OUT:"{probe}"',
-    ]
-    subprocess.run(['cmd.exe', '/d', '/c', ' && '.join(commands)], cwd=directory, check=True)
+    script = directory / 'build-legacy-guard.bat'
+    script.write_text('\r\n'.join([
+        '@echo off',
+        f'call "{setup}" x64 || exit /b 1',
+        f'cl /nologo /W4 /WX /LD /MT "{source}" /link msi.lib advapi32.lib /OUT:"{dll}" || exit /b 1',
+        f'cl /nologo /W4 /WX /MT /DAJ_GUARD_TEST "{source}" /link msi.lib advapi32.lib /OUT:"{probe}" || exit /b 1',
+        '',
+    ]), encoding='utf-8')
+    subprocess.run([str(script)], cwd=directory, check=True)
     with tempfile.TemporaryDirectory() as temporary:
         parent = Path(temporary)
         cases = [(parent / 'missing', 0), (parent, 0)]

@@ -27,7 +27,7 @@ def check_shortcuts(target):
         command = f"(New-Object -ComObject WScript.Shell).CreateShortcut('{escaped}').TargetPath"
         destination = subprocess.check_output(['pwsh.exe', '-NoProfile', '-NonInteractive',
                                                '-Command', command], text=True, encoding='utf-8').strip()
-        if Path(destination) != target / f'{DISPLAY_NAME}.exe':
+        if not Path(destination).samefile(target / f'{DISPLAY_NAME}.exe'):
             raise RuntimeError(f'Shortcut target incorrect: {shortcut}: {destination}')
     return desktop, menu
 

@@ -1,15 +1,51 @@
-"""Exercise the packaged MSI through the jpackage EXE on a Windows CI runner."""
+"""Exercise the MSI embedded in a jpackage EXE on a Windows CI runner."""
 import argparse
+import ctypes
+from ctypes import wintypes
 from pathlib import Path
 import subprocess
 import tempfile
 
 
+def extract_msi(installer, destination):
+    kernel = ctypes.WinDLL('kernel32', use_last_error=True)
+    kernel.LoadLibraryExW.argtypes = [wintypes.LPCWSTR, wintypes.HANDLE, wintypes.DWORD]
+    kernel.LoadLibraryExW.restype = wintypes.HMODULE
+    kernel.FindResourceW.argtypes = [wintypes.HMODULE, wintypes.LPCWSTR, ctypes.c_void_p]
+    kernel.FindResourceW.restype = wintypes.HANDLE
+    kernel.SizeofResource.argtypes = [wintypes.HMODULE, wintypes.HANDLE]
+    kernel.SizeofResource.restype = wintypes.DWORD
+    kernel.LoadResource.argtypes = [wintypes.HMODULE, wintypes.HANDLE]
+    kernel.LoadResource.restype = wintypes.HANDLE
+    kernel.LockResource.argtypes = [wintypes.HANDLE]
+    kernel.LockResource.restype = ctypes.c_void_p
+    kernel.FreeLibrary.argtypes = [wintypes.HMODULE]
+    module = kernel.LoadLibraryExW(str(installer), None, 2)
+    if not module:
+        raise ctypes.WinError(ctypes.get_last_error())
+    try:
+        resource = kernel.FindResourceW(module, 'MSI', ctypes.c_void_p(10))
+        if not resource:
+            raise ctypes.WinError(ctypes.get_last_error())
+        size = kernel.SizeofResource(module, resource)
+        pointer = kernel.LockResource(kernel.LoadResource(module, resource))
+        if not size or not pointer:
+            raise ctypes.WinError(ctypes.get_last_error())
+        destination.write_bytes(ctypes.string_at(pointer, size))
+    finally:
+        kernel.FreeLibrary(module)
+
+
 def check_install(installer, target, log, expected, *properties):
-    result = subprocess.run([
-        str(installer), '/qn', '/norestart', '/L*v', str(log),
-        f'INSTALLDIR={target}', *properties,
-    ], timeout=180, check=False)
+    try:
+        result = subprocess.run([
+            'msiexec.exe', '/i', str(installer), '/qn', '/norestart', '/L*v', str(log),
+            f'INSTALLDIR={target}', *properties,
+        ], timeout=180, check=False)
+    except subprocess.TimeoutExpired:
+        if log.exists():
+            print(log.read_text(encoding='utf-16', errors='replace')[-16000:], flush=True)
+        raise
     text = log.read_text(encoding='utf-16', errors='replace') if log.exists() else ''
     if result.returncode not in expected:
         raise RuntimeError(f'Installer returned {result.returncode}:\n{text[-16000:]}')
@@ -26,19 +62,22 @@ def main():
         raise RuntimeError(f'Installer missing: {installer}')
     with tempfile.TemporaryDirectory(prefix='aj-installer-test-') as temporary:
         parent = Path(temporary)
+        msi = parent / 'installer.msi'
+        extract_msi(installer, msi)
         target = parent / 'Install Target'
         marker = target / 'Java'
         marker.mkdir(parents=True)
-        check_install(installer, target, parent / 'legacy.log', (1603,))
+        check_install(msi, target, parent / 'legacy.log', (1603,))
         marker.rmdir()
         try:
-            check_install(installer, target, parent / 'install.log', (0, 3010))
+            check_install(msi, target, parent / 'install.log', (0, 3010))
             if not (target / 'runtime').is_dir():
                 raise RuntimeError(f'Installer ignored INSTALLDIR: {target}')
-            check_install(installer, target, parent / 'repair.log', (0, 3010),
+            check_install(msi, target, parent / 'repair.log', (0, 3010),
                           'REINSTALL=ALL', 'REINSTALLMODE=vomus')
         finally:
-            result = subprocess.run([str(installer), 'uninstall'], timeout=180, check=False)
+            result = subprocess.run(['msiexec.exe', '/x', str(msi), '/qn', '/norestart'],
+                                    timeout=180, check=False)
             if result.returncode not in (0, 3010):
                 raise RuntimeError(f'Uninstall returned {result.returncode}')
     print('Windows installer: legacy rejection, install, repair and uninstall passed')

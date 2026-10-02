@@ -6,6 +6,7 @@ import zipfile
 from xml.sax.saxutils import escape
 
 LEGACY_PRODUCTS = ('appleJuice Collector',)
+DISPLAY_NAME = 'appleJuice Collector'
 UNINSTALL_KEY = r'Software\Microsoft\Windows\CurrentVersion\Uninstall'
 
 
@@ -27,7 +28,7 @@ def add_legacy_guard(template):
       <RegistrySearch Id="AjLegacySearch{index}_{view}" Root="HKLM" Key="{key}"
                       Name="UninstallString" Type="raw" Bitness="always{view}"/>
     </Property>''')
-    message = ('Eine alte NSIS-Installation wurde gefunden: ' + ', '.join(LEGACY_PRODUCTS) + '. '
+    message = (f'Alte Installation von {DISPLAY_NAME} gefunden. '
                'Bitte zuerst das alte Setup deinstallieren und danach dieses Setup erneut starten. '
                'Die Installation wird abgebrochen.')
     declarations.append(f'''

@@ -8,7 +8,28 @@ import subprocess
 import tempfile
 import winreg
 
-from windows_installer import LEGACY_PRODUCTS, UNINSTALL_KEY
+from windows_installer import DISPLAY_NAME, LEGACY_PRODUCTS, UNINSTALL_KEY
+
+
+def check_shortcuts(target):
+    command = ("[Environment]::GetFolderPath('CommonDesktopDirectory'); "
+               "[Environment]::GetFolderPath('CommonPrograms')")
+    folders = subprocess.check_output(['pwsh.exe', '-NoProfile', '-NonInteractive',
+                                       '-Command', command], text=True, encoding='utf-8').splitlines()
+    if len(folders) != 2 or not all(folders):
+        raise RuntimeError(f'Cannot resolve Windows shortcut folders: {folders}')
+    desktop = Path(folders[0]) / f'{DISPLAY_NAME}.lnk'
+    menu = Path(folders[1]) / 'appleJuiceNETZ' / f'{DISPLAY_NAME}.lnk'
+    for shortcut in (desktop, menu):
+        if not shortcut.is_file():
+            raise RuntimeError(f'Shortcut missing: {shortcut}')
+        escaped = str(shortcut).replace("'", "''")
+        command = f"(New-Object -ComObject WScript.Shell).CreateShortcut('{escaped}').TargetPath"
+        destination = subprocess.check_output(['pwsh.exe', '-NoProfile', '-NonInteractive',
+                                               '-Command', command], text=True, encoding='utf-8').strip()
+        if Path(destination) != target / f'{DISPLAY_NAME}.exe':
+            raise RuntimeError(f'Shortcut target incorrect: {shortcut}: {destination}')
+    return desktop, menu
 
 
 @contextmanager
@@ -77,6 +98,8 @@ def check_install(installer, target, log, expected, *properties):
         raise RuntimeError(f'Installer returned {result.returncode}:\n{text[-16000:]}')
     if 1603 in expected and 'Bitte zuerst das alte Setup deinstallieren' not in text:
         raise RuntimeError(f'Legacy guard did not report the intended error:\n{text[-16000:]}')
+    if 1603 in expected and f'Alte Installation von {DISPLAY_NAME} gefunden.' not in text:
+        raise RuntimeError(f'Legacy guard did not report the generic product name:\n{text[-16000:]}')
 
 
 def main():
@@ -107,6 +130,7 @@ def main():
                 raise RuntimeError(f'Installer ignored INSTALLDIR: {target}')
             if not marker.is_dir():
                 raise RuntimeError('Installer removed the unrelated Java directory')
+            shortcuts = check_shortcuts(target)
             with legacy_entry(products[-1], winreg.KEY_WOW64_64KEY):
                 check_install(msi, target, parent / 'repair.log', (0, 3010),
                               'REINSTALL=ALL', 'REINSTALLMODE=vomus')
@@ -116,7 +140,9 @@ def main():
                                         timeout=180, check=False)
             if result.returncode not in (0, 3010):
                 raise RuntimeError(f'Uninstall returned {result.returncode}')
-    print('Windows installer: registry rejection, Java folder allowed, install, repair and uninstall passed')
+        if any(shortcut.exists() for shortcut in shortcuts):
+            raise RuntimeError('Uninstall left product shortcuts behind')
+    print('Windows installer: registry rejection, generic error, shortcut names, install, repair and uninstall passed')
 
 
 if __name__ == '__main__':

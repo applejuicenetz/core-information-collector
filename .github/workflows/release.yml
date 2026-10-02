@@ -78,9 +78,13 @@ jobs:
           version="$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)"
           mkdir -p target/jpackage-input target/jpackage-output
           cp target/AJCollector.jar target/jpackage-input/
+          package_name=AJCollector
+          if [[ "$PACKAGE_PLATFORM" == windows ]]; then
+            package_name="appleJuice Collector"
+          fi
           options=(
             --type "$PACKAGE_TYPE"
-            --name AJCollector
+            --name "$package_name"
             --app-version "$version"
             --vendor appleJuiceNETZ
             --input target/jpackage-input
@@ -110,7 +114,7 @@ jobs:
             )
           fi
           jpackage "${options[@]}"
-          mv "target/jpackage-output/AJCollector-${version}.${PACKAGE_TYPE}" "target/AJCollector-${PACKAGE_PLATFORM}-${PACKAGE_ARCH}.${PACKAGE_TYPE}"
+          mv "target/jpackage-output/${package_name}-${version}.${PACKAGE_TYPE}" "target/AJCollector-${PACKAGE_PLATFORM}-${PACKAGE_ARCH}.${PACKAGE_TYPE}"
 
       - name: Test Windows installer
         if: matrix.platform == 'windows'

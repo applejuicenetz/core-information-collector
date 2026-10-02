@@ -87,8 +87,6 @@ jobs:
             name=ghcr.io/${{ github.repository }}
           tags: |
             type=semver,pattern={{version}},value=${{ steps.version.outputs.tag }},enable=${{ steps.version.outputs.tag != '' }}
-            type=semver,pattern={{major}}.{{minor}},value=${{ steps.version.outputs.tag }},enable=${{ steps.version.outputs.tag != '' }}
-            type=semver,pattern={{major}},value=${{ steps.version.outputs.tag }},enable=${{ steps.version.outputs.tag != '' }}
             type=ref,event=branch,enable=${{ steps.version.outputs.tag == '' }}
 
       - name: Set up QEMU

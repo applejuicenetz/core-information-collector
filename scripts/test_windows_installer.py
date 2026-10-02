@@ -1,10 +1,34 @@
 """Exercise the MSI embedded in a jpackage EXE on a Windows CI runner."""
 import argparse
+from contextlib import contextmanager
 import ctypes
 from ctypes import wintypes
 from pathlib import Path
 import subprocess
 import tempfile
+import winreg
+
+from windows_installer import LEGACY_PRODUCTS, UNINSTALL_KEY
+
+
+@contextmanager
+def legacy_entry(product, view):
+    path = f'{UNINSTALL_KEY}\\{product}'
+    try:
+        existing = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, path, 0, winreg.KEY_READ | view)
+    except FileNotFoundError:
+        pass
+    else:
+        existing.Close()
+        raise RuntimeError(f'Refusing to overwrite existing uninstall entry: {path}')
+    with winreg.CreateKeyEx(winreg.HKEY_LOCAL_MACHINE, path, 0, winreg.KEY_WRITE | view) as entry:
+        winreg.SetValueEx(entry, 'DisplayName', 0, winreg.REG_SZ, product)
+        winreg.SetValueEx(entry, 'UninstallString', 0, winreg.REG_SZ,
+                         r'"C:\Removed NSIS Installation\uninstaller.exe"')
+    try:
+        yield
+    finally:
+        winreg.DeleteKeyEx(winreg.HKEY_LOCAL_MACHINE, path, view)
 
 
 def extract_msi(installer, destination):
@@ -58,6 +82,7 @@ def check_install(installer, target, log, expected, *properties):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('installer', type=Path)
+    parser.add_argument('--folder', required=True, choices=LEGACY_PRODUCTS)
     args = parser.parse_args()
     installer = args.installer.resolve()
     if not installer.is_file():
@@ -69,20 +94,30 @@ def main():
         target = parent / 'Install Target'
         marker = target / 'Java'
         marker.mkdir(parents=True)
-        check_install(msi, target, parent / 'legacy.log', (1603,))
-        marker.rmdir()
+        products = LEGACY_PRODUCTS[args.folder]
+        for index, product in enumerate(products):
+            for view_name, view in (('32', winreg.KEY_WOW64_32KEY), ('64', winreg.KEY_WOW64_64KEY)):
+                with legacy_entry(product, view):
+                    check_install(msi, parent / 'Clean Target',
+                                  parent / f'legacy-{index}-{view_name}.log', (1603,))
+                print(f'Legacy registry rejection passed: {product} ({view_name}-bit)', flush=True)
         try:
-            check_install(msi, target, parent / 'install.log', (0, 3010))
+            with legacy_entry(products[0] + ' unrelated', winreg.KEY_WOW64_32KEY):
+                check_install(msi, target, parent / 'install.log', (0, 3010))
             if not (target / 'runtime').is_dir():
                 raise RuntimeError(f'Installer ignored INSTALLDIR: {target}')
-            check_install(msi, target, parent / 'repair.log', (0, 3010),
-                          'REINSTALL=ALL', 'REINSTALLMODE=vomus')
+            if not marker.is_dir():
+                raise RuntimeError('Installer removed the unrelated Java directory')
+            with legacy_entry(products[-1], winreg.KEY_WOW64_64KEY):
+                check_install(msi, target, parent / 'repair.log', (0, 3010),
+                              'REINSTALL=ALL', 'REINSTALLMODE=vomus')
         finally:
-            result = subprocess.run(['msiexec.exe', '/x', str(msi), '/qn', '/norestart'],
-                                    timeout=180, check=False)
+            with legacy_entry(products[-1], winreg.KEY_WOW64_64KEY):
+                result = subprocess.run(['msiexec.exe', '/x', str(msi), '/qn', '/norestart'],
+                                        timeout=180, check=False)
             if result.returncode not in (0, 3010):
                 raise RuntimeError(f'Uninstall returned {result.returncode}')
-    print('Windows installer: legacy rejection, install, repair and uninstall passed')
+    print('Windows installer: registry rejection, Java folder allowed, install, repair and uninstall passed')
 
 
 if __name__ == '__main__':

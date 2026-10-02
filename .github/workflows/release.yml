@@ -44,6 +44,11 @@ jobs:
           server-username-env-var: GITHUB_ACTOR
           server-password-env-var: GITHUB_TOKEN
 
+      - uses: actions/setup-python@v7
+        if: matrix.platform == 'windows'
+        with:
+          python-version: '3.x'
+
       - uses: actions/setup-dotnet@v6
         if: matrix.platform == 'windows'
         with:
@@ -88,7 +93,9 @@ jobs:
           if [[ "$PACKAGE_PLATFORM" == macos ]]; then
             options+=(--icon assets/mac/AJCollector.icns --mac-package-identifier de.applejuicenet.collector --resource-dir assets/mac)
           else
+            python scripts/windows_installer.py --folder Collector --product "appleJuice Collector" --resource-dir target/jpackage-resources
             options+=(
+              --resource-dir target/jpackage-resources
               --icon assets/windows/AJCollector.ico
               --description "appleJuice Collector"
               --copyright appleJuiceNETZ

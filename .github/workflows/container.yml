@@ -1,10 +1,15 @@
 name: 'container'
 
 on:
-  release:
-    types:
-      - published
-      - released
+  push:
+    tags:
+      - '*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Existing git tag to build, e.g. 4.0.0 (empty = build current branch)'
+        required: false
+        type: string
 
 jobs:
   container:
@@ -15,6 +20,50 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+
+      - name: Checkout release source
+        if: inputs.version != ''
+        uses: actions/checkout@v7
+        with:
+          ref: refs/tags/${{ inputs.version }}
+          path: .release-source
+
+      - name: Resolve version
+        id: version
+        shell: bash
+        env:
+          TAG_NAME: ${{ inputs.version || (github.ref_type == 'tag' && github.ref_name) }}
+        run: echo "tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up Java
+        uses: actions/setup-java@v6
+        with:
+          distribution: zulu
+          java-version: '25'
+          cache: maven
+          server-id: github
+          server-username-env-var: GITHUB_ACTOR
+          server-password-env-var: GITHUB_TOKEN
+
+      - name: Build JAR
+        shell: bash
+        working-directory: ${{ inputs.version && '.release-source' || '.' }}
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          TAG_NAME: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if [[ -n "$TAG_NAME" ]]; then
+            mvn -B versions:set -DnewVersion="${TAG_NAME#v}" -DgenerateBackupPoms=false
+          fi
+          mvn -B package
+
+      - name: Copy release JAR into build context
+        if: inputs.version != ''
+        shell: bash
+        run: |
+          mkdir -p target
+          cp .release-source/target/AJCollector.jar target/AJCollector.jar
 
       - name: login to docker.io container registry
         uses: docker/login-action@v4
@@ -36,6 +85,11 @@ jobs:
           images: |
             name=docker.io/${{ github.repository }}
             name=ghcr.io/${{ github.repository }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ steps.version.outputs.tag }},enable=${{ steps.version.outputs.tag != '' }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.version.outputs.tag }},enable=${{ steps.version.outputs.tag != '' }}
+            type=semver,pattern={{major}},value=${{ steps.version.outputs.tag }},enable=${{ steps.version.outputs.tag != '' }}
+            type=ref,event=branch,enable=${{ steps.version.outputs.tag == '' }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v4
@@ -52,5 +106,3 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-          build-args: |
-            VERSION=${{ github.ref_name }}

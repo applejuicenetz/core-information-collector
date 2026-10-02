@@ -38,10 +38,12 @@ def extract_msi(installer, destination):
 
 def check_install(installer, target, log, expected, *properties):
     try:
-        result = subprocess.run([
+        command = subprocess.list2cmdline([
             'msiexec.exe', '/i', str(installer), '/qn', '/norestart', '/L*v', str(log),
-            f'INSTALLDIR={target}', *properties,
-        ], timeout=180, check=False)
+        ]) + f' INSTALLDIR="{target}"'
+        if properties:
+            command += ' ' + ' '.join(properties)
+        result = subprocess.run(command, timeout=180, check=False)
     except subprocess.TimeoutExpired:
         if log.exists():
             print(log.read_text(encoding='utf-16', errors='replace')[-16000:], flush=True)

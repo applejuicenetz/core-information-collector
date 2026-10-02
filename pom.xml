@@ -24,7 +24,7 @@
     <repositories>
         <repository>
             <id>github</id>
-            <url>https://maven.pkg.github.com/red171/libtray</url>
+            <url>https://maven.pkg.github.com/red171/libtray-java</url>
         </repository>
     </repositories>
 
@@ -40,19 +40,14 @@
             <version>${tinylog.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.tinylog</groupId>
-            <artifactId>slf4j-tinylog</artifactId>
-            <version>${tinylog.version}</version>
-        </dependency>
-        <dependency>
             <groupId>com.eclipsesource.minimal-json</groupId>
             <artifactId>minimal-json</artifactId>
             <version>0.9.5</version>
         </dependency>
         <dependency>
-            <groupId>dev.hivens</groupId>
-            <artifactId>libtray</artifactId>
-            <version>0.1.3-flatpak.2</version>
+            <groupId>io.github.red171</groupId>
+            <artifactId>libtray-java</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

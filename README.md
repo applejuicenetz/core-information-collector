@@ -23,7 +23,7 @@ als `stdOut` ausgegeben.
 
 Die [Release-Pipeline](.github/workflows/release.yml) baut vier native Installer mit JDK 25 `jpackage` und zwei Flatpak-Bundles aus dem [lokalen Collector-Manifest](flatpak/io.github.applejuicenetz.collector.yaml). Die Linux-Bundles werden nativ für x86_64 und aarch64 gebaut; beide enthalten die für Java 25 benötigte Laufzeit. Im Release-Job liegen alle sechs Dateien zusammen in `target/`; bei manueller Ausführung stehen sie als Actions-Artefakt `AJCollector-packages` bereit. Nur das gemeinsame signierte Flatpak-Repository für mehrere appleJuice-Programme wird weiterhin separat im [flatpak-Repo](https://github.com/applejuicenetz/flatpak) veröffentlicht.
 
-Für lokale Maven-Builds wird `dev.hivens:libtray:0.1.3-flatpak.2` aus GitHub Packages geladen. Dafür braucht Maven einen GitHub-Token mit `read:packages` im `~/.m2/settings.xml` (Server-ID `github`); die Release-Pipeline verwendet ihren `GITHUB_TOKEN`.
+Für lokale Maven-Builds wird `io.github.red171:libtray-java:0.1.0-SNAPSHOT` aus GitHub Packages geladen. Dafür braucht Maven einen GitHub-Token mit `read:packages` im `~/.m2/settings.xml` (Server-ID `github`); die Release-Pipeline verwendet ihren `GITHUB_TOKEN`.
 
 ## Changelog
 

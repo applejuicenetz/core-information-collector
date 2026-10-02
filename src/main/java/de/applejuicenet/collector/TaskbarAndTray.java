@@ -1,12 +1,11 @@
 package de.applejuicenet.collector;
 
-import dev.hivens.libtray.Tray;
-import dev.hivens.libtray.TrayBuilder;
-import dev.hivens.libtray.TrayEvent;
-import dev.hivens.libtray.TrayMenu;
-import dev.hivens.libtray.TrayMenuItem;
+import io.github.red171.libtray.Tray;
+import io.github.red171.libtray.TrayBuilder;
+import io.github.red171.libtray.TrayEvent;
+import io.github.red171.libtray.TrayMenu;
+import io.github.red171.libtray.TrayMenuItem;
 import org.tinylog.Logger;
-import kotlin.Unit;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -191,17 +190,16 @@ public class TaskbarAndTray implements ActionListener {
                     null,
                     "io.github.applejuicenetz.collector.StatusNotifierItem"
             );
-            nativeTray = Tray.Companion.create(builder);
+            nativeTray = Tray.create(builder);
             if (nativeTray == null) {
                 return false;
             }
             nativeTray.onEvent(event -> {
                 if (event instanceof TrayEvent.MenuItemSelected selected) {
-                    actionPerformed(new ActionEvent(nativeTray, ActionEvent.ACTION_PERFORMED, selected.getId()));
+                    actionPerformed(new ActionEvent(nativeTray, ActionEvent.ACTION_PERFORMED, selected.id()));
                 } else if (event instanceof TrayEvent.Activated) {
                     runner.toggleStatusFrame();
                 }
-                return Unit.INSTANCE;
             });
             Logger.info("Initialized native Linux tray using StatusNotifierItem");
             return true;

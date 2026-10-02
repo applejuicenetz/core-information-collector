@@ -1,6 +1,7 @@
 """Add the legacy NSIS Java-directory guard to a JDK 25 WiX template."""
 import argparse
 import os
+import platform
 from pathlib import Path
 import subprocess
 import tempfile
@@ -14,6 +15,9 @@ def add_legacy_guard(template, dll, folder, product):
             raise RuntimeError(f'Unsupported jpackage WiX template: {marker}')
     if 'AjCheckLegacyInstall' in template:
         raise RuntimeError('Legacy guard already present')
+    message = ('Eine alte NSIS-Installation wurde gefunden (Unterordner Java in [AJ_LEGACY_PATH]). '
+               'Bitte zuerst das alte Setup deinstallieren und danach dieses Setup erneut starten. '
+               'Die Installation wird abgebrochen.')
     declarations = f'''
     <Property Id="AJ_LEGACY_FOLDER" Value="{escape(folder, {'"': '&quot;'})}"/>
     <Property Id="AJ_LEGACY_PRODUCT" Value="{escape(product, {'"': '&quot;'})}"/>
@@ -22,25 +26,37 @@ def add_legacy_guard(template, dll, folder, product):
                   DllEntry="CheckLegacyInstallation" Execute="immediate" Return="check"/>
     <CustomAction Id="AjCheckLegacyTarget" BinaryKey="AjLegacyGuard"
                   DllEntry="CheckLegacyInstallation" Execute="immediate" Return="check"/>
+    <CustomAction Id="AjBlockLegacyInstall" Error="{escape(message, {'"': '&quot;'})}"/>
+    <CustomAction Id="AjBlockLegacyTarget" Error="{escape(message, {'"': '&quot;'})}"/>
 '''
     template = template.replace('</Product>', declarations + '\n  </Product>')
     template = template.replace('<InstallExecuteSequence>', '''<InstallExecuteSequence>
       <Custom Action="AjCheckLegacyInstall" Before="RemoveExistingProducts">NOT (REMOVE~="ALL")</Custom>
-      <Custom Action="AjCheckLegacyTarget" Before="InstallValidate">NOT (REMOVE~="ALL")</Custom>''')
+      <Custom Action="AjBlockLegacyInstall" After="AjCheckLegacyInstall">AJ_LEGACY_PATH AND NOT (REMOVE~="ALL")</Custom>
+      <Custom Action="AjCheckLegacyTarget" Before="InstallValidate">NOT (REMOVE~="ALL")</Custom>
+      <Custom Action="AjBlockLegacyTarget" After="AjCheckLegacyTarget">AJ_LEGACY_PATH AND NOT (REMOVE~="ALL")</Custom>''')
     template = template.replace('<InstallUISequence>', '''<InstallUISequence>
       <Custom Action="AjCheckLegacyInstall" After="CostFinalize">NOT (REMOVE~="ALL")</Custom>
-      <Custom Action="AjCheckLegacyTarget" Before="ExecuteAction">NOT (REMOVE~="ALL")</Custom>''')
+      <Custom Action="AjBlockLegacyInstall" After="AjCheckLegacyInstall">AJ_LEGACY_PATH AND NOT (REMOVE~="ALL")</Custom>
+      <Custom Action="AjCheckLegacyTarget" Before="ExecuteAction">NOT (REMOVE~="ALL")</Custom>
+      <Custom Action="AjBlockLegacyTarget" After="AjCheckLegacyTarget">AJ_LEGACY_PATH AND NOT (REMOVE~="ALL")</Custom>''')
     return template
 
 
 def compile_guard(directory):
     vswhere = Path(os.environ['ProgramFiles(x86)']) / 'Microsoft Visual Studio/Installer/vswhere.exe'
+    machines = (platform.machine(), os.environ.get('PROCESSOR_ARCHITECTURE', ''),
+                os.environ.get('PROCESSOR_ARCHITEW6432', ''))
+    native = any(machine.upper() in ('ARM64', 'AARCH64') for machine in machines)
+    architecture = 'arm64' if native else 'x64'
+    component = ('Microsoft.VisualStudio.Component.VC.Tools.ARM64' if native
+                 else 'Microsoft.VisualStudio.Component.VC.Tools.x86.x64')
     installation = subprocess.check_output([
-        str(vswhere), '-latest', '-products', '*', '-requires',
-        'Microsoft.VisualStudio.Component.VC.Tools.x86.x64', '-property', 'installationPath'
+        str(vswhere), '-latest', '-products', '*', '-requires', component,
+        '-property', 'installationPath'
     ], text=True).strip()
     if not installation:
-        raise RuntimeError('MSVC x64 build tools required for the Windows MSI custom action')
+        raise RuntimeError(f'MSVC {architecture} build tools required for the Windows MSI custom action')
     setup = Path(installation) / 'VC/Auxiliary/Build/vcvarsall.bat'
     source = Path(__file__).with_name('legacy_install_guard.c')
     dll = directory / 'legacy-install-guard.dll'
@@ -48,12 +64,13 @@ def compile_guard(directory):
     script = directory / 'build-legacy-guard.bat'
     script.write_text('\r\n'.join([
         '@echo off',
-        f'call "{setup}" x64 || exit /b 1',
+        f'call "{setup}" {architecture} || exit /b 1',
         f'cl /nologo /W4 /WX /LD /MT "{source}" /link msi.lib advapi32.lib /OUT:"{dll}" || exit /b 1',
-        f'cl /nologo /W4 /WX /MT /DAJ_GUARD_TEST "{source}" /link msi.lib advapi32.lib /OUT:"{probe}" || exit /b 1',
+        f'cl /nologo /W4 /WX /wd4191 /MT /DAJ_GUARD_TEST "{source}" /link msi.lib advapi32.lib /STACK:262144 /OUT:"{probe}" || exit /b 1',
         '',
     ]), encoding='utf-8')
     subprocess.run([str(script)], cwd=directory, check=True)
+    subprocess.run([str(probe), '--dll', str(dll)], check=True)
     with tempfile.TemporaryDirectory() as temporary:
         parent = Path(temporary)
         cases = [(parent / 'missing', 0), (parent, 0)]

@@ -10,12 +10,15 @@
 #define PATH_CAPACITY 32768
 
 static BOOL has_legacy_java(const WCHAR *directory) {
-    WCHAR marker[PATH_CAPACITY];
+    WCHAR *marker = HeapAlloc(GetProcessHeap(), 0, PATH_CAPACITY * sizeof(WCHAR));
     DWORD attributes;
+    if (!marker) return FALSE;
     if (!directory[0] || FAILED(StringCchPrintfW(marker, PATH_CAPACITY, L"%s\\Java", directory))) {
+        HeapFree(GetProcessHeap(), 0, marker);
         return FALSE;
     }
     attributes = GetFileAttributesW(marker);
+    HeapFree(GetProcessHeap(), 0, marker);
     return attributes != INVALID_FILE_ATTRIBUTES && (attributes & FILE_ATTRIBUTE_DIRECTORY) != 0;
 }
 
@@ -68,10 +71,9 @@ static BOOL registered_legacy(HKEY root, REGSAM view, const WCHAR *product, WCHA
     return FALSE;
 }
 
-static BOOL find_legacy(MSIHANDLE session, WCHAR *path) {
+static BOOL find_legacy(MSIHANDLE session, WCHAR *path, WCHAR *base) {
     WCHAR folder[128];
     WCHAR product[128];
-    WCHAR base[PATH_CAPACITY];
     const WCHAR *properties[] = {L"ProgramFiles64Folder", L"ProgramFilesFolder"};
     const WCHAR *variables[] = {L"ProgramW6432", L"ProgramFiles", L"ProgramFiles(x86)"};
     size_t index;
@@ -98,24 +100,33 @@ static BOOL find_legacy(MSIHANDLE session, WCHAR *path) {
 }
 
 __declspec(dllexport) UINT __stdcall CheckLegacyInstallation(MSIHANDLE session) {
-    WCHAR path[PATH_CAPACITY];
-    WCHAR message[PATH_CAPACITY + 256];
-    MSIHANDLE record;
-    if (!find_legacy(session, path)) return ERROR_SUCCESS;
-    StringCchPrintfW(message, PATH_CAPACITY + 256,
-        L"Eine alte NSIS-Installation wurde in \"%s\" gefunden (Unterordner Java). "
-        L"Bitte deinstallieren Sie zuerst das alte Setup und starten Sie danach dieses Setup erneut. "
-        L"Die Installation wird abgebrochen.", path);
-    record = MsiCreateRecord(1);
-    MsiRecordSetStringW(record, 0, L"[1]");
-    MsiRecordSetStringW(record, 1, message);
-    MsiProcessMessage(session, INSTALLMESSAGE_ERROR | MB_OK | MB_ICONERROR, record);
-    MsiCloseHandle(record);
-    return ERROR_INSTALL_FAILURE;
+    WCHAR *buffers = HeapAlloc(GetProcessHeap(), 0, 2 * PATH_CAPACITY * sizeof(WCHAR));
+    if (!buffers) return ERROR_OUTOFMEMORY;
+    MsiSetPropertyW(session, L"AJ_LEGACY_PATH", L"");
+    if (find_legacy(session, buffers, buffers + PATH_CAPACITY)) {
+        MsiSetPropertyW(session, L"AJ_LEGACY_PATH", buffers);
+    }
+    HeapFree(GetProcessHeap(), 0, buffers);
+    return ERROR_SUCCESS;
 }
 
 #ifdef AJ_GUARD_TEST
 int wmain(int argc, WCHAR **argv) {
+    if (argc == 3 && wcscmp(argv[1], L"--dll") == 0) {
+        HMODULE library = LoadLibraryW(argv[2]);
+        typedef UINT (__stdcall *GuardEntry)(MSIHANDLE);
+        GuardEntry entry;
+        UINT result;
+        if (!library) return 3;
+        entry = (GuardEntry)GetProcAddress(library, "CheckLegacyInstallation");
+        if (!entry) {
+            FreeLibrary(library);
+            return 4;
+        }
+        result = entry(0);
+        FreeLibrary(library);
+        return result == ERROR_SUCCESS ? 0 : 5;
+    }
     if (argc != 2) return 2;
     return has_legacy_java(argv[1]) ? 1 : 0;
 }

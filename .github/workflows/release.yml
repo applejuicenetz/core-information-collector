@@ -112,6 +112,11 @@ jobs:
           jpackage "${options[@]}"
           mv "target/jpackage-output/AJCollector-${version}.${PACKAGE_TYPE}" "target/AJCollector-${PACKAGE_PLATFORM}-${PACKAGE_ARCH}.${PACKAGE_TYPE}"
 
+      - name: Test Windows installer
+        if: matrix.platform == 'windows'
+        shell: pwsh
+        run: python scripts/test_windows_installer.py target/AJCollector-windows-${{ matrix.arch }}.exe
+
       - name: Verify macOS network usage description
         if: matrix.platform == 'macos'
         shell: bash

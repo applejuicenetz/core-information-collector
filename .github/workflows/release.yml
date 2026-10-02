@@ -93,7 +93,7 @@ jobs:
           if [[ "$PACKAGE_PLATFORM" == macos ]]; then
             options+=(--icon assets/mac/AJCollector.icns --mac-package-identifier de.applejuicenet.collector --resource-dir assets/mac)
           else
-            python scripts/windows_installer.py --folder Collector --resource-dir target/jpackage-resources
+            python scripts/windows_installer.py --resource-dir target/jpackage-resources
             options+=(
               --resource-dir target/jpackage-resources
               --icon assets/windows/AJCollector.ico
@@ -115,7 +115,7 @@ jobs:
       - name: Test Windows installer
         if: matrix.platform == 'windows'
         shell: pwsh
-        run: python scripts/test_windows_installer.py target/AJCollector-windows-${{ matrix.arch }}.exe --folder Collector
+        run: python scripts/test_windows_installer.py target/AJCollector-windows-${{ matrix.arch }}.exe
 
       - name: Verify macOS network usage description
         if: matrix.platform == 'macos'

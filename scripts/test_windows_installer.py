@@ -82,7 +82,6 @@ def check_install(installer, target, log, expected, *properties):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('installer', type=Path)
-    parser.add_argument('--folder', required=True, choices=LEGACY_PRODUCTS)
     args = parser.parse_args()
     installer = args.installer.resolve()
     if not installer.is_file():
@@ -94,7 +93,7 @@ def main():
         target = parent / 'Install Target'
         marker = target / 'Java'
         marker.mkdir(parents=True)
-        products = LEGACY_PRODUCTS[args.folder]
+        products = LEGACY_PRODUCTS
         for index, product in enumerate(products):
             for view_name, view in (('32', winreg.KEY_WOW64_32KEY), ('64', winreg.KEY_WOW64_64KEY)):
                 with legacy_entry(product, view):

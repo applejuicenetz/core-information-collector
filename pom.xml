@@ -17,7 +17,7 @@
         <repository>
             <id>github</id>
             <name>GitHub OWNER Apache Maven Packages</name>
-            <url>https://maven.pkg.github.com/${github.owner}/${project.artifactId}</url>
+            <url>https://maven.pkg.github.com/${github.owner}/core-information-collector</url>
         </repository>
     </distributionManagement>
 

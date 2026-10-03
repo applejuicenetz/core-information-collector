@@ -16,7 +16,7 @@
     <url type="faq">https://applejuicenetz.github.io/faq/</url>
     <url type="bugtracker">https://github.com/applejuicenetz/collector/issues</url>
     <releases>
-        <release version="4.0.0" type="stable" date="2026-10-02"/>
+        <release version="4.0.1" type="stable" date="2026-10-03"/>
     </releases>
     <categories>
         <category>Network</category>

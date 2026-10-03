@@ -52,6 +52,7 @@ Hat der Core ein Passwort und/oder läuft auf einem anderen Gerät, muss die `.x
 | `taskbarIcon`    | `true`       | zeige Icon in der Taskbar  | `true` oder `false`, steuert das Icon in der Taskbar                              |
 | `core > host`    | `valid host` | IP des Core mit Protokoll  | Bei den meisten `http://127.0.0.1`                                                |
 | `core > port `   | `9851`       | Core XML Port              | Der XML API Port des Core                                                         |
+| `core > timeout` | `5000`       | Millisekunden              | optional, Zeitüberschreitung für Anfragen an den Core                             |
 | `core > passwd`  | `md5sum`     | MD5 Passwort vom Core      | `de305845b091d971732a123977e2d816` kann aus der `settings.xml` entnommen werden   |
 | `target > url`   | `valid url`  | Ziel URL                   | `https://discord.applejuicenet.cc/api/core-collector/`                            |
 | `target > token` | `Text`       | Auth Token für die API URL | `d9c1f872-5f48-42af-bd0d-601f2f05352a`                                            |

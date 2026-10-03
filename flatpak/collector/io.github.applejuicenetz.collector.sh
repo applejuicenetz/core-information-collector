@@ -4,7 +4,7 @@ if [ -e /tmp/ajcollector.lock ] && kill -0 "$(cat /tmp/ajcollector.lock)" 2>/dev
   exit 0
 fi
 
-JAVA_ARGS="-Djava.net.preferIPv4Stack=true -Dsun.java2d.xrender=false"
+JAVA_ARGS="-Xmx512m -XX:+UseSerialGC -Djava.net.preferIPv4Stack=true -Dsun.java2d.xrender=false"
 
 cd /app/share/io.github.applejuicenetz.collector/ || exit 1
 

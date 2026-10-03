@@ -35,6 +35,7 @@ class Config {
     private static final String DEFAULT_CORE_HOST = "http://127.0.0.1";
     private static final String DEFAULT_CORE_PORT = "9851";
     private static final String DEFAULT_CORE_PASSWD = "";
+    private static final int DEFAULT_CORE_TIMEOUT = Http.DEFAULT_TIMEOUT;
 
     private static final String DEFAULT_FORWARD_LINE = "Core `%coreVersion%` - Credits `%coreCredits%` - Uploaded `%coreSessionUpload%` - Downloaded `%coreSessionDownload%` - Upload `%coreUploadSpeed%` - Download `%coreDownloadSpeed%` - Share `%shareFiles%` Files (`%shareSize%`)";
     private static final String DEFAULT_FORWARD_URL = "https://discord.applejuicenet.cc/api/core-collector";
@@ -50,6 +51,7 @@ class Config {
     private String coreHost = DEFAULT_CORE_HOST;
     private String corePort = DEFAULT_CORE_PORT;
     private String corePassword = DEFAULT_CORE_PASSWD;
+    private int coreTimeout = DEFAULT_CORE_TIMEOUT;
 
     private final List<Target> targets = new ArrayList<Target>();
 
@@ -66,6 +68,11 @@ class Config {
 
         if (!fileXML.exists()) {
             File legacyFile = new File(aFile, LEGACY_FILENAME_XML);
+
+            if (legacyFile.isFile() && !legacyFile.canWrite()) {
+                Logger.info("{} ist schreibgeschützt und wird nicht nach {} verschoben", LEGACY_FILENAME_XML, FILENAME_XML);
+                return legacyFile;
+            }
 
             if (legacyFile.isFile()) {
                 try {
@@ -134,6 +141,7 @@ class Config {
         coreHost = coreConfig.getAttribute("host");
         corePort = coreConfig.getAttribute("port");
         corePassword = coreConfig.getAttribute("password");
+        coreTimeout = parsePositive("core timeout", coreConfig.getAttribute("timeout"), DEFAULT_CORE_TIMEOUT);
 
         NodeList forwardTargets = document.getElementsByTagName("target");
 
@@ -165,8 +173,8 @@ class Config {
         return infoLine;
     }
 
-    public Integer getInterval() {
-        return Integer.parseInt(intervall);
+    public int getInterval() {
+        return parsePositive("intervall", intervall, Integer.parseInt(DEFAULT_INTERVALL));
     }
 
     public String getCoreHost() {
@@ -177,11 +185,34 @@ class Config {
         return corePort;
     }
 
+    public int getCoreTimeout() {
+        return coreTimeout;
+    }
+
+    private static int parsePositive(String name, String value, int defaultValue) {
+        if (value == null || value.isBlank()) {
+            return defaultValue;
+        }
+
+        try {
+            int number = Integer.parseInt(value.trim());
+
+            if (number > 0) {
+                return number;
+            }
+        } catch (NumberFormatException ignored) {
+        }
+
+        Logger.error("Ungültiger Wert '{}' für {}, verwende {}", value, name, defaultValue);
+
+        return defaultValue;
+    }
+
     public String getCorePassword() {
         return !corePassword.equals("") ? corePassword : "d41d8cd98f00b204e9800998ecf8427e";
     }
 
-    public List getTargets() {
+    public List<Target> getTargets() {
         return targets;
     }
 

@@ -79,7 +79,7 @@ public class Version {
         while (i < len1 && i < len2) {
             if (strList1.get(i).length() > strList2.get(i).length()) return 1;
             if (strList1.get(i).length() < strList2.get(i).length()) return -1;
-            int result = new Long(strList1.get(i)).compareTo(new Long(strList2.get(i)));
+            int result = Long.compare(Long.parseLong(strList1.get(i)), Long.parseLong(strList2.get(i)));
             if (result != 0) return result;
             i++;
         }

@@ -1,11 +1,24 @@
 # Changelog
 
+## 4.0.1
+
+- Die Zeitüberschreitung für Anfragen an den Core ist optional über `<core timeout="5000" />` einstellbar.
+- Deutlich weniger Speicherverbrauch bei großem Share.
+- Verbindungen zum Core und zu den Forward-Zielen werden sauber beendet, auch mit Zeitüberschreitung von 5 Sekunden.
+- Eine schreibgeschützte `core-information-collector.xml` wird nicht mehr in `collector.xml` umbenannt, sondern unverändert weiterverwendet.
+- Das Core-Passwort erscheint nicht mehr in Fehlermeldungen und Logs.
+- Ist der Core nicht erreichbar, werden keine alten Werte mehr angezeigt oder weitergeleitet.
+- Ein ungültiges `intervall` oder ein Fehler im Hintergrund stoppt den Collector nicht mehr.
+- Logausgabe kürzer. Fehler stehen nun auch in `collector.log`.
+
 ## 4.0.0
 
 - Mit Java 25 gebaut.
-- Native Pakete für Windows und macOS sowie Flatpak-Bundles für Linux werden jeweils für `amd64` und `aarch64` auf der passenden Architektur erstellt. Alle Pakete enthalten eine Java-25-Laufzeit; eine separate Java-Installation ist nicht erforderlich.
-- Die Konfigurationsdatei wurde von `core-information-collector.xml` zu `collector.xml` umbenannt. Eine vorhandene Datei mit altem Namen wird beim Start automatisch übernommen.
-- Zeitüberschreitung für HTTP-Anfragen an den Core auf fünf Sekunden gesetzt.
+- Native Pakete für Windows und macOS sowie Flatpak-Bundles für Linux werden jeweils für `amd64` und `aarch64` auf der passenden Architektur erstellt. 
+  - Alle Pakete enthalten eine Java-25-Laufzeit; eine separate Java-Installation ist nicht erforderlich.
+- Die Konfigurationsdatei wurde von `core-information-collector.xml` zu `collector.xml` umbenannt.
+  - Eine vorhandene Datei mit altem Namen wird beim Start automatisch übernommen.
+- Zeitüberschreitung für HTTP-Anfragen an den Core auf 5 Sekunden gesetzt.
 - macOS-Pakete enthalten mit `NSLocalNetworkUsageDescription` eine Erklärung für den Zugriff auf den Core im lokalen Netzwerk.
 - Unter macOS wird nur das native Tray-Kontextmenü geöffnet; das zusätzliche Swing-Menü entfällt.
 

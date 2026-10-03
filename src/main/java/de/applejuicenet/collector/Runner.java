@@ -9,6 +9,9 @@ import org.xml.sax.InputSource;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.xml.parsers.DocumentBuilder;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -16,11 +19,12 @@ import javax.xml.xpath.XPathFactory;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
 import java.text.NumberFormat;
 import java.util.Timer;
 import java.util.*;
@@ -67,6 +71,7 @@ public class Runner extends TimerTask {
     private DefaultTableModel statusModel;
 
     public static void main(String[] args) {
+        System.setProperty("tinylog.configuration", "resources/tinylog.properties");
         System.setProperty("apple.awt.application.name", APP_NAME);
 
         new Runner();
@@ -94,27 +99,20 @@ public class Runner extends TimerTask {
         timer.schedule(this, 1000, config.getInterval());
     }
 
-    public void run() {
+    public synchronized void run() {
         try {
-            prepareCoreVersion();
+            update();
         } catch (Exception e) {
+            Logger.error(e.getMessage() != null ? e.getMessage() : e.toString());
+        } catch (Throwable e) {
             Logger.error(e);
-            return;
         }
+    }
 
-        try {
-            prepareShare();
-        } catch (Exception e) {
-            Logger.error(e);
-            return;
-        }
-
-        try {
-            prepareAppleJuiceInformation();
-        } catch (Exception e) {
-            Logger.error(e);
-            return;
-        }
+    private void update() throws Exception {
+        prepareCoreVersion();
+        prepareShare();
+        prepareAppleJuiceInformation();
 
         updateReplacer();
 
@@ -144,12 +142,7 @@ public class Runner extends TimerTask {
 
         String payload;
 
-        try {
-            payload = Http.get(url);
-        } catch (Exception e) {
-            Logger.error(e.getMessage());
-            return;
-        }
+        payload = Http.get(url, config.getCoreTimeout());
 
         handleAppleCoreVersion(payload);
     }
@@ -169,32 +162,36 @@ public class Runner extends TimerTask {
     private void prepareShare() throws Exception {
         String url = String.format("%s:%s/xml/share.xml?password=%s", config.getCoreHost(), config.getCorePort(), config.getCorePassword());
 
-        String payload;
-
-        try {
-            payload = Http.get(url);
-        } catch (Exception e) {
-            Logger.error(e.getMessage());
-            return;
-        }
-
-        handleShare(payload);
+        Http.stream(url, config.getCoreTimeout(), this::handleShare);
     }
 
-    private void handleShare(String payload) throws Exception {
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        Document document = db.parse(new InputSource(new StringReader(payload)));
+    private Void handleShare(InputStream stream) throws Exception {
+        BufferedInputStream in = new BufferedInputStream(stream);
+        Http.failOnWrongPassword(in);
 
-        XPath xpath = xpf.newXPath();
-        Element shares = (Element) xpath.evaluate("/applejuice/shares", document, XPathConstants.NODE);
+        XMLInputFactory factory = XMLInputFactory.newInstance();
+        factory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+        factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, false);
 
-        shareFiles = 0;
-        sharedSize = 0;
-        for (int i = 0; i < shares.getElementsByTagName("share").getLength(); i++) {
-            Element file = (Element) document.getElementsByTagName("share").item(i);
-            shareFiles++;
-            sharedSize += Long.parseLong(file.getAttribute("size"));
+        long files = 0;
+        long size = 0;
+
+        XMLStreamReader reader = factory.createXMLStreamReader(in);
+        try {
+            while (reader.hasNext()) {
+                if (reader.next() == XMLStreamConstants.START_ELEMENT && "share".equals(reader.getLocalName())) {
+                    files++;
+                    size += Long.parseLong(reader.getAttributeValue(null, "size"));
+                }
+            }
+        } finally {
+            reader.close();
         }
+
+        shareFiles = files;
+        sharedSize = size;
+
+        return null;
     }
 
     private void prepareAppleJuiceInformation() throws Exception {
@@ -202,12 +199,7 @@ public class Runner extends TimerTask {
 
         String url = String.format("%s:%s/xml/modified.xml?password=%s", config.getCoreHost(), config.getCorePort(), config.getCorePassword());
 
-        try {
-            payload = Http.get(url);
-        } catch (Exception e) {
-            Logger.error(e.getMessage());
-            return;
-        }
+        payload = Http.get(url, config.getCoreTimeout());
 
         handleAppleJuiceInformation(payload);
     }
@@ -240,16 +232,18 @@ public class Runner extends TimerTask {
     }
 
     private void forward() {
-        config.getTargets().forEach(consumer -> {
+        config.getTargets().forEach(target -> {
+            HttpURLConnection connection = null;
             try {
-                Target target = (Target) consumer;
 
                 String forwardUrl = target.getUrl();
                 String forwardToken = target.getToken();
                 String forwardLine = target.getLine();
 
                 String charset = "UTF-8";
-                HttpURLConnection connection = (HttpURLConnection) new URL(forwardUrl).openConnection();
+                connection = (HttpURLConnection) URI.create(forwardUrl).toURL().openConnection();
+                connection.setConnectTimeout(Http.DEFAULT_TIMEOUT);
+                connection.setReadTimeout(Http.DEFAULT_TIMEOUT);
                 connection.setDoOutput(true);
                 connection.setRequestMethod("POST");
                 connection.setRequestProperty("Accept-Charset", charset);
@@ -285,10 +279,16 @@ public class Runner extends TimerTask {
                     output.write(Line.getBytes(charset));
                 }
 
-                InputStream response = connection.getInputStream();
+                try (InputStream response = connection.getInputStream()) {
+                    response.transferTo(OutputStream.nullOutputStream());
+                }
                 Logger.info(String.format("forward successful: %s", forwardUrl));
             } catch (Exception e) {
                 Logger.error(e.getMessage());
+            } finally {
+                if (connection != null) {
+                    connection.disconnect();
+                }
             }
         });
     }

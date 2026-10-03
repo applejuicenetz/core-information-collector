@@ -315,3 +315,13 @@ jobs:
           git add pom.xml flatpak/collector/io.github.applejuicenetz.collector.metainfo.xml
           git commit -m "Release $version"
           git push origin HEAD:main
+
+  notify-flatpak:
+    needs: release
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger flatpak repository sync
+        env:
+          GH_TOKEN: ${{ secrets.FLATPAK_DISPATCH_TOKEN }}
+        run: gh api repos/applejuicenetz/flatpak/dispatches -f event_type=flatpak-release

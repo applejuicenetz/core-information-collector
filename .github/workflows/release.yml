@@ -216,6 +216,9 @@ jobs:
           distribution: zulu
           java-version: '25'
           cache: maven
+          server-id: github
+          server-username-env-var: GITHUB_ACTOR
+          server-password-env-var: GITHUB_TOKEN
       - uses: actions/download-artifact@v8
         with:
           pattern: native-*
@@ -247,12 +250,18 @@ jobs:
             target/*.exe
             target/*.flatpak
           if-no-files-found: error
-      - name: Publish JAR to GitHub Packages
+      - name: Publish de.applejuicenet.core-information-collector to GitHub Packages
         if: github.ref_type == 'tag'
         shell: bash
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
+          coordinates="$(mvn -q help:evaluate -Dexpression=project.groupId -DforceStdout):$(mvn -q help:evaluate -Dexpression=project.artifactId -DforceStdout)"
+          if [[ "$coordinates" != de.applejuicenet:core-information-collector ]]; then
+            echo "::error::Unexpected Maven coordinates: $coordinates"
+            exit 1
+          fi
           mvn -B versions:set -DnewVersion="${GITHUB_REF_NAME#v}" -DgenerateBackupPoms=false
           mvn -B deploy
       - name: Publish GitHub release

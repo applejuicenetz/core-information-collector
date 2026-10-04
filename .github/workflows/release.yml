@@ -332,5 +332,5 @@ jobs:
     steps:
       - name: Trigger flatpak repository sync
         env:
-          GH_TOKEN: ${{ secrets.FLATPAK_DISPATCH_TOKEN }}
+          GH_TOKEN: ${{ secrets.PACKAGE_DISPATCH_TOKEN }}
         run: gh api repos/applejuicenetz/flatpak/dispatches -f event_type=flatpak-release

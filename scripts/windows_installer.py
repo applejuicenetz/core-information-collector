@@ -26,7 +26,7 @@ def add_legacy_guard(template):
             declarations.append(f'''
     <Property Id="{identifier}">
       <RegistrySearch Id="AjLegacySearch{index}_{view}" Root="HKLM" Key="{key}"
-                      Name="UninstallString" Type="raw" Bitness="always{view}"/>
+                      Name="UninstallString" Type="raw" Win64="{'yes' if view == '64' else 'no'}"/>
     </Property>''')
     message = (f'Alte Installation von {DISPLAY_NAME} gefunden. '
                'Bitte zuerst das alte Setup deinstallieren und danach dieses Setup erneut starten. '

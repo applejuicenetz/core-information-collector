@@ -38,7 +38,7 @@ jobs:
       - uses: actions/setup-java@v6
         with:
           distribution: zulu
-          java-version: '21'
+          java-version: '25'
           cache: maven
           server-id: github
           server-username-env-var: GITHUB_ACTOR
@@ -49,18 +49,18 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install WiX 3 for JDK 21 jpackage
+      - uses: actions/setup-dotnet@v6
+        if: matrix.platform == 'windows'
+        with:
+          dotnet-version: '8.0.x'
+      - name: Install WiX for jpackage
         if: matrix.platform == 'windows'
         shell: pwsh
         run: |
-          $archive = Join-Path $env:RUNNER_TEMP 'wix314.zip'
-          Invoke-WebRequest https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip -OutFile $archive
-          if ((Get-FileHash $archive -Algorithm SHA256).Hash.ToLower() -ne '6ac824e1642d6f7277d0ed7ea09411a508f6116ba6fae0aa5f2c7daa2ff43d31') {
-            throw 'WiX archive checksum mismatch'
-          }
-          $tools = Join-Path $env:RUNNER_TEMP 'wix314'
-          Expand-Archive $archive -DestinationPath $tools
-          $tools >> $env:GITHUB_PATH
+          dotnet tool install --global wix --version 5.0.2
+          "$env:USERPROFILE\.dotnet\tools" >> $env:GITHUB_PATH
+          & "$env:USERPROFILE\.dotnet\tools\wix.exe" extension add --global WixToolset.UI.wixext/5.0.2
+          & "$env:USERPROFILE\.dotnet\tools\wix.exe" extension add --global WixToolset.Util.wixext/5.0.2
 
       - name: Build JAR and native installer
         shell: bash
@@ -91,7 +91,6 @@ jobs:
             --main-jar AJCollector.jar
             --main-class de.applejuicenet.collector.Runner
             --add-modules java.desktop,java.management,java.naming,java.sql,java.xml,jdk.crypto.ec,jdk.unsupported
-            --java-options --enable-preview
             --java-options --enable-native-access=ALL-UNNAMED
             --dest target/jpackage-output
           )
@@ -159,7 +158,7 @@ jobs:
       - uses: actions/setup-java@v6
         with:
           distribution: zulu
-          java-version: '21'
+          java-version: '25'
           cache: maven
           server-id: github
           server-username-env-var: GITHUB_ACTOR
@@ -207,76 +206,15 @@ jobs:
           path: target/AJCollector-linux-${{ matrix.package-arch }}.flatpak
           if-no-files-found: error
 
-  archive32:
-    runs-on: ubuntu-24.04
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - platform: windows
-            arch: x86
-            file: bellsoft-jre21.0.12.1+1-windows-i586.zip
-            sha256: 5dfc687e12cc9d00a55542cdf9eb1e8b7abb26b0bf43ea929d49d9f0be6106e4
-          - platform: linux
-            arch: x86
-            file: bellsoft-jre21.0.12.1+1-linux-i586.tar.gz
-            sha256: 386c795617217ace46b9acb1ba1a40c604b8c753d9c121972a496a62d95cd305
-          - platform: linux
-            arch: armhf
-            file: bellsoft-jre21.0.12.1+1-linux-arm32-vfp-hflt.tar.gz
-            sha256: 61b1a07a4caeaa68e75a7b5f4a599a8411ad26406e21a3f684a547a38af0a0a5
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
-        with:
-          distribution: zulu
-          java-version: '21'
-          cache: maven
-          server-id: github
-          server-username-env-var: GITHUB_ACTOR
-          server-password-env-var: GITHUB_TOKEN
-      - uses: actions/setup-python@v7
-        with:
-          python-version: '3.x'
-      - name: Build JAR and bundled 32-bit archive
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          RUNTIME_FILE: ${{ matrix.file }}
-          RUNTIME_SHA256: ${{ matrix.sha256 }}
-          PACKAGE_PLATFORM: ${{ matrix.platform }}
-          PACKAGE_ARCH: ${{ matrix.arch }}
-        run: |
-          set -euo pipefail
-          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
-            mvn -B versions:set -DnewVersion="${GITHUB_REF_NAME#v}" -DgenerateBackupPoms=false
-          fi
-          mvn -B package
-          python -m unittest discover -s scripts -p 'test_archive.py'
-          mkdir -p target/runtime32
-          curl --fail --location --retry 3 "https://github.com/bell-sw/Liberica/releases/download/21.0.12.1%2B1/${RUNTIME_FILE//+/%2B}" -o "target/$RUNTIME_FILE"
-          printf '%s  %s\n' "$RUNTIME_SHA256" "target/$RUNTIME_FILE" | sha256sum --check -
-          if [[ "$RUNTIME_FILE" == *.zip ]]; then
-            unzip -q "target/$RUNTIME_FILE" -d target/runtime32
-          else
-            tar -xf "target/$RUNTIME_FILE" -C target/runtime32
-          fi
-          python scripts/archive.py --jar target/AJCollector.jar --runtime target/runtime32/jre-21.0.12.1 --platform "$PACKAGE_PLATFORM" --arch "$PACKAGE_ARCH"
-      - uses: actions/upload-artifact@v7
-        with:
-          name: archive32-${{ matrix.platform }}-${{ matrix.arch }}
-          path: target/AJCollector-${{ matrix.platform }}-${{ matrix.arch }}.${{ matrix.platform == 'windows' && 'zip' || 'tar.gz' }}
-          if-no-files-found: error
-
   release:
-    needs: [package, flatpak, archive32]
+    needs: [package, flatpak]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-java@v6
         with:
           distribution: zulu
-          java-version: '21'
+          java-version: '25'
           cache: maven
           server-id: github
           server-username-env-var: GITHUB_ACTOR
@@ -291,12 +229,7 @@ jobs:
           pattern: flatpak-*
           merge-multiple: true
           path: target
-      - uses: actions/download-artifact@v8
-        with:
-          pattern: archive32-*
-          merge-multiple: true
-          path: target
-      - name: Check all packages
+      - name: Check all six packages
         shell: bash
         run: |
           set -euo pipefail
@@ -306,10 +239,7 @@ jobs:
             AJCollector-windows-amd64.exe \
             AJCollector-windows-aarch64.exe \
             AJCollector-linux-amd64.flatpak \
-            AJCollector-linux-aarch64.flatpak \
-            AJCollector-windows-x86.zip \
-            AJCollector-linux-x86.tar.gz \
-            AJCollector-linux-armhf.tar.gz; do
+            AJCollector-linux-aarch64.flatpak; do
             test -s "target/$file"
           done
       - uses: actions/upload-artifact@v7
@@ -319,8 +249,6 @@ jobs:
             target/*.dmg
             target/*.exe
             target/*.flatpak
-            target/AJCollector-*.tar.gz
-            target/AJCollector-windows-x86.zip
           if-no-files-found: error
       - name: Publish de.applejuicenet.core-information-collector to GitHub Packages
         if: github.ref_type == 'tag'
@@ -351,9 +279,6 @@ jobs:
             target/AJCollector-windows-aarch64.exe
             target/AJCollector-linux-amd64.flatpak
             target/AJCollector-linux-aarch64.flatpak
-            target/AJCollector-windows-x86.zip
-            target/AJCollector-linux-x86.tar.gz
-            target/AJCollector-linux-armhf.tar.gz
 
   update-main:
     if: github.ref_type == 'tag'
@@ -367,7 +292,7 @@ jobs:
       - uses: actions/setup-java@v6
         with:
           distribution: zulu
-          java-version: '21'
+          java-version: '25'
           cache: maven
           server-id: github
           server-username-env-var: GITHUB_ACTOR

@@ -1,11 +1,5 @@
 # Changelog
 
-## 4.0.2 (WIP)
-
-- Mit Java 21 gebaut; native Pakete und Flatpak-Bundles enthalten eine Java-21-Laufzeit.
-- Zusätzliche 32-Bit-Pakete mit gebündelter Java-Laufzeit: Windows x86 (ZIP) sowie Linux x86 und ARM32 (`tar.gz`).
-- Auf 32-Bit-Java verwendet der Collector automatisch das AWT-Tray, weil das native Linux-Tray dort nicht verfügbar ist.
-
 ## 4.0.1
 
 - Die Zeitüberschreitung für Anfragen an den Core ist optional über `<core timeout="5000" />` einstellbar.

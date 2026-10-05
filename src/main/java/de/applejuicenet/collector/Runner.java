@@ -69,6 +69,7 @@ public class Runner extends TimerTask {
     private JFrame statusFrame;
 
     private DefaultTableModel statusModel;
+    private volatile Map<String, String> statusRows = statusSnapshot(Map.of(), false);
 
     public static void main(String[] args) {
         System.setProperty("tinylog.configuration", "resources/tinylog.properties");
@@ -103,9 +104,27 @@ public class Runner extends TimerTask {
         try {
             update();
         } catch (Exception e) {
+            showStatusFailure();
             Logger.error(e.getMessage() != null ? e.getMessage() : e.toString());
         } catch (Throwable e) {
+            showStatusFailure();
             Logger.error(e);
+        }
+    }
+
+    static Map<String, String> statusSnapshot(Map<String, String> values, boolean connected) {
+        TreeMap<String, String> rows = new TreeMap<>();
+        rows.put("Status", connected ? "Core verbunden" : "Core-Abfrage fehlgeschlagen");
+        if (connected) {
+            rows.putAll(values);
+        }
+        return rows;
+    }
+
+    private void showStatusFailure() {
+        statusRows = statusSnapshot(Map.of(), false);
+        if (!GraphicsEnvironment.isHeadless()) {
+            updateStatusFramePanel();
         }
     }
 
@@ -125,6 +144,7 @@ public class Runner extends TimerTask {
         }
 
         if (!GraphicsEnvironment.isHeadless()) {
+            statusRows = statusSnapshot(replacer, true);
             updateStatusFramePanel();
         }
 
@@ -363,11 +383,18 @@ public class Runner extends TimerTask {
     }
 
     private void updateStatusFramePanel() {
-        if (statusFrame != null && statusFrame.isVisible()) {
-            statusModel.setRowCount(0);
-            for (Map.Entry<String, String> pair : replacer.entrySet()) {
-                statusModel.addRow(new Object[]{pair.getKey(), pair.getValue()});
-            }
+        updateStatusFramePanel(false);
+    }
+
+    private void updateStatusFramePanel(boolean force) {
+        if (statusFrame != null && (force || statusFrame.isVisible())) {
+            Map<String, String> rows = statusRows;
+            SwingUtilities.invokeLater(() -> {
+                statusModel.setRowCount(0);
+                for (Map.Entry<String, String> pair : rows.entrySet()) {
+                    statusModel.addRow(new Object[]{pair.getKey(), pair.getValue()});
+                }
+            });
         }
     }
 
@@ -391,6 +418,7 @@ public class Runner extends TimerTask {
         }
 
         statusFrame.pack();
+        updateStatusFramePanel(true);
 
         if (!statusFrame.isVisible()) {
             statusFrame.setLocationRelativeTo(null);

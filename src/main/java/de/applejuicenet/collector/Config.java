@@ -88,8 +88,8 @@ class Config {
             try {
                 createConfig(
                         fileXML,
+                        DEFAULT_TRAYICON,
                         DEFAULT_TASKBARICON,
-                        DEFAULT_INFO_LINE,
                         DEFAULT_INFO_LINE,
                         DEFAULT_INTERVALL,
                         DEFAULT_CORE_HOST,

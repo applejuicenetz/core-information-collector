@@ -52,7 +52,9 @@ public class TaskbarAndTray implements ActionListener {
             }
         }
 
-        boolean nativeTrayCreated = runner.config.isTrayIcon() && isLinux() && createNativeTray();
+        boolean nativeTrayCreated = runner.config.isTrayIcon()
+                && useNativeTray(System.getProperty("os.name", ""), System.getProperty("sun.arch.data.model", ""))
+                && createNativeTray();
 
         if (runner.config.isTrayIcon() && !nativeTrayCreated && SystemTray.isSupported()) {
             SystemTray systemTray = SystemTray.getSystemTray();
@@ -210,8 +212,8 @@ public class TaskbarAndTray implements ActionListener {
         }
     }
 
-    private boolean isLinux() {
-        return System.getProperty("os.name", "").toLowerCase(Locale.ROOT).contains("linux");
+    static boolean useNativeTray(String osName, String dataModel) {
+        return osName.toLowerCase(Locale.ROOT).contains("linux") && "64".equals(dataModel);
     }
 
     private boolean isMacOS() {

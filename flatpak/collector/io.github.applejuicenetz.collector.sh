@@ -8,4 +8,4 @@ JAVA_ARGS="-Xmx512m -XX:+UseSerialGC -Djava.net.preferIPv4Stack=true -Dsun.java2
 
 cd /app/share/io.github.applejuicenetz.collector/ || exit 1
 
-exec java $JAVA_ARGS -jar /app/share/io.github.applejuicenetz.collector/AJCollector.jar "$@"
+exec java --enable-preview --enable-native-access=ALL-UNNAMED $JAVA_ARGS -jar /app/share/io.github.applejuicenetz.collector/AJCollector.jar "$@"

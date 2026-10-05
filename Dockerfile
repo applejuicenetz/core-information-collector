@@ -6,4 +6,4 @@ COPY target/AJCollector.jar /app/AJCollector.jar
 
 WORKDIR /app
 
-CMD ["java", "-Duser.home=/app", "-jar", "/app/AJCollector.jar"]
+CMD ["java", "-Djava.awt.headless=true", "-Duser.home=/app", "-jar", "/app/AJCollector.jar"]

@@ -244,15 +244,6 @@ jobs:
             AJCollector-linux-aarch64.flatpak; do
             test -s "target/$file"
           done
-      - uses: actions/upload-artifact@v7
-        with:
-          name: AJCollector-packages
-          path: |
-            target/*.dmg
-            target/*.exe
-            target/*.flatpak
-          if-no-files-found: error
-          retention-days: 1
       - name: Publish de.applejuicenet.core-information-collector to GitHub Packages
         if: github.ref_type == 'tag'
         shell: bash

@@ -140,6 +140,7 @@ jobs:
           name: native-${{ matrix.platform }}-${{ matrix.arch }}
           path: target/AJCollector-${{ matrix.platform }}-${{ matrix.arch }}.${{ matrix.type }}
           if-no-files-found: error
+          retention-days: 1
 
   flatpak:
     strategy:
@@ -205,6 +206,7 @@ jobs:
           name: flatpak-${{ matrix.package-arch }}
           path: target/AJCollector-linux-${{ matrix.package-arch }}.flatpak
           if-no-files-found: error
+          retention-days: 1
 
   release:
     needs: [package, flatpak]
@@ -250,6 +252,7 @@ jobs:
             target/*.exe
             target/*.flatpak
           if-no-files-found: error
+          retention-days: 1
       - name: Publish de.applejuicenet.core-information-collector to GitHub Packages
         if: github.ref_type == 'tag'
         shell: bash

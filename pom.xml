@@ -8,7 +8,7 @@
 
     <properties>
         <maven.compiler.release>25</maven.compiler.release>
-        <tinylog.version>2.8.0</tinylog.version>
+        <tinylog.version>2.8.1</tinylog.version>
         <github.owner>applejuicenetz</github.owner>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>

@@ -55,6 +55,17 @@ jobs:
         if: matrix.goos == 'windows'
         shell: pwsh
         run: choco upgrade innosetup --yes --no-progress
+      - name: Install ARM64 C compiler
+        if: matrix.goos == 'windows' && matrix.goarch == 'arm64'
+        shell: pwsh
+        run: |
+          $release = '20261020'
+          Invoke-WebRequest "https://github.com/mstorsjo/llvm-mingw/releases/download/$release/llvm-mingw-$release-ucrt-aarch64.zip" -OutFile llvm-mingw.zip
+          Expand-Archive llvm-mingw.zip -DestinationPath "$env:RUNNER_TEMP"
+          $bin = "$env:RUNNER_TEMP\llvm-mingw-$release-ucrt-aarch64\bin"
+          "$bin" | Out-File -Append -Encoding utf8 $env:GITHUB_PATH
+          "CC=$bin\aarch64-w64-mingw32-clang.exe" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+          "CXX=$bin\aarch64-w64-mingw32-clang++.exe" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
       - name: Build and package
         shell: bash
         env:

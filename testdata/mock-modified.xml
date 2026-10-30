@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<applejuice>
+<time>1792407974449</time>
+<ids>
+<serverid id="101"/>
+<serverid id="102"/>
+<serverid id="103"/>
+<serverid id="104"/>
+<serverid id="1701"/>
+<serverid id="1702"/>
+<serverid id="1703"/>
+<serverid id="1704"/>
+<serverid id="1705"/>
+<serverid id="1706"/>
+<uploadid id="125"/>
+<uploadid id="127"/>
+<uploadid id="129"/>
+<uploadid id="131"/>
+<uploadid id="133"/>
+<uploadid id="135"/>
+<uploadid id="137"/>
+<uploadid id="1699"/>
+<downloadid id="105">
+</downloadid>
+<downloadid id="111">
+</downloadid>
+<downloadid id="114">
+<userid id="116"/>
+</downloadid>
+<downloadid id="117">
+</downloadid>
+<downloadid id="119">
+</downloadid>
+<downloadid id="121">
+</downloadid>
+<downloadid id="123">
+</downloadid>
+<downloadid id="150">
+</downloadid>
+</ids>
+<server id="101" name="Sample server A" host="server-a.example" lastseen="1792391237586" port="9855" connectiontry="0"/>
+<server id="102" name="Sample server with a long name for wrapping tests" host="server-b.example" lastseen="0" port="9855" connectiontry="0"/>
+<server id="103" name="" host="server-c.example" lastseen="0" port="7001" connectiontry="0"/>
+<server id="104" name="Sample server D" host="server-d.example" lastseen="0" port="9855" connectiontry="0"/>
+<download id="105" shareid="-1" hash="2adc0baf219c6f2355ac376dd381876c" size="4154798080" status="14" powerdownload="0" temporaryfilenumber="105" filename="ubuntu-26.04.1-desktop-arm64-with-a-really-long-file-name-for-wrapping-tests.iso" targetdirectory="" ready="4154798080"/>
+<download id="111" shareid="-1" hash="cc24a187629999812f01a703f7e45481" size="735358976" status="14" powerdownload="12" temporaryfilenumber="111" filename="debian-13.7.0-amd64-netinst.iso" targetdirectory="" ready="735358976"/>
+<download id="114" shareid="-1" hash="71a329ce4fd4472ebc55840ef3275f6d" size="1500000000" status="0" powerdownload="0" temporaryfilenumber="114" filename='Konzert [2024] ÄÖÜ ß &lt;test&gt; &amp; "quotes".mkv' targetdirectory="Videos" ready="300000000"/>
+<user id="116" source="4" downloadid="114" status="5" directstate="1" downloadfrom="-1" downloadto="-1" actualdownloadposition="-1" speed="0" version="0.35.185.93" operatingsystem="1" queueposition="4" powerdownload="0" filename='Konzert [2024] ÄÖÜ ß &lt;test&gt; &amp; "quotes".mkv' nickname="frank"/>
+<download id="117" shareid="-1" hash="9389c4ddd29e82217606dcde076cd465" size="52000000" status="18" powerdownload="0" temporaryfilenumber="117" filename="pausiert.zip" targetdirectory="" ready="10000000"/>
+<download id="119" shareid="-1" hash="592cae6e4925f63b79464d2757ce302c" size="220000000" status="17" powerdownload="0" temporaryfilenumber="119" filename="abgebrochen.rar" targetdirectory="" ready="1000000"/>
+<download id="121" shareid="-1" hash="b9c0a8a7c4adbabfbe75a710c230de78" size="8000000" status="14" powerdownload="0" temporaryfilenumber="121" filename="fertig.tar.gz" targetdirectory="" ready="8000000"/>
+<download id="123" shareid="-1" hash="07eec17f95e158f96d195647ff74beee" size="99000000" status="0" powerdownload="0" temporaryfilenumber="123" filename="suchend.bin" targetdirectory="" ready="0"/>
+<upload id="125" shareid="126" version="0.35.185.93" operatingsystem="1" status="1" directstate="1" priority="100" nick="alice" uploadfrom="0" actualuploadposition="2000000" uploadto="10000000" lastconnection="1792391237586" speed="180000" loaded="37.5"/>
+<upload id="127" shareid="128" version="0.35.185.93" operatingsystem="2" status="2" directstate="0" priority="90" nick="gerd" uploadfrom="-1" actualuploadposition="-1" uploadto="-1" lastconnection="1792391237586" speed="0" loaded="-1.0"/>
+<upload id="129" shareid="130" version="0.35.185.93" operatingsystem="3" status="2" directstate="1" priority="80" nick="heidi" uploadfrom="-1" actualuploadposition="-1" uploadto="-1" lastconnection="1792391237586" speed="0" loaded="0.0"/>
+<upload id="131" shareid="132" version="0.35.185.93" operatingsystem="1" status="2" directstate="2" priority="70" nick="ivan" uploadfrom="-1" actualuploadposition="-1" uploadto="-1" lastconnection="1792391237586" speed="0" loaded="12.0"/>
+<upload id="133" shareid="134" version="0.35.185.93" operatingsystem="2" status="1" directstate="2" priority="60" nick="judy" uploadfrom="0" actualuploadposition="10000000" uploadto="50000000" lastconnection="1792391237586" speed="64000" loaded="100.0"/>
+<upload id="135" shareid="136" version="0.35.185.93" operatingsystem="3" status="2" directstate="2" priority="50" nick="karl" uploadfrom="-1" actualuploadposition="-1" uploadto="-1" lastconnection="1792391237586" speed="0" loaded="-1.0"/>
+<upload id="137" shareid="138" version="0.35.185.93" operatingsystem="1" status="1" directstate="1" priority="40" nick="lena" uploadfrom="0" actualuploadposition="14000000" uploadto="70000000" lastconnection="1792391237586" speed="32000" loaded="62.25"/>
+<search id="144" searchtext="debian" opensearches="0" foundfiles="4" sumsearches="4" running="false"/>
+<searchentry id="145" searchid="144" checksum="cc24a187629999812f01a703f7e45481" size="735358976">
+<filename name="debian-13.7.0-amd64-netinst.iso" user="12"/>
+<filename name="debian.iso" user="3"/>
+</searchentry>
+<searchentry id="146" searchid="144" checksum="771d91aec691f5158705bead60b2c247" size="3200000000">
+<filename name="debian-live-xfce.iso" user="5"/>
+</searchentry>
+<searchentry id="147" searchid="144" checksum="84630c14df9cee95d962ca8fe8fa5262" size="12345">
+<filename name="debian-notes.txt" user="1"/>
+</searchentry>
+<searchentry id="148" searchid="144" checksum="c63ed071c3d8919021d51b80cb51df26" size="650000000">
+<filename name="debian-unknown.iso" user="2"/>
+</searchentry>
+<download id="150" shareid="-1" hash="84630c14df9cee95d962ca8fe8fa5262" size="12345" status="14" powerdownload="0" temporaryfilenumber="150" filename="debian-notes.txt" targetdirectory="" ready="12345"/>
+<information credits="4654845359" sessionupload="123456" sessiondownload="654321" uploadspeed="276000" downloadspeed="0" openconnections="1" maxuploadpositions="50"/>
+<networkinfo users="450" files="4191120" filesize="1449.57" firewalled="true" ip="203.0.113.7" tryconnecttoserver="-1" connectedwithserverid="101" connectedsince="1792387637586" paused="false">
+<welcomemessage>Mock Core: welcome to the synthetic network</welcomemessage></networkinfo>
+<upload id="1699" shareid="1698" version="0.35.185.93" operatingsystem="1" status="2" directstate="1" priority="50" nick="mona" uploadfrom="-1" actualuploadposition="-1" uploadto="-1" lastconnection="1792391237616" speed="0" loaded="-1.0"/>
+<server id="1701" name="" host="apple-deluxe.ddns.net" lastseen="1792394141663" port="9855" connectiontry="0"/>
+<server id="1702" name="" host="knastbruder.applejuicenet.cc" lastseen="1792394141665" port="9855" connectiontry="0"/>
+<server id="1703" name="" host="applejuice.mohnarch.de" lastseen="1792394141667" port="33210" connectiontry="0"/>
+<server id="1704" name="" host="chimera.goip.de" lastseen="1792394141668" port="9855" connectiontry="0"/>
+<server id="1705" name="" host="aj-server.ddnss.de" lastseen="1792394141670" port="7001" connectiontry="0"/>
+<server id="1706" name="" host="rainer22.ddns.net" lastseen="1792394141672" port="9855" connectiontry="0"/>
+</applejuice>

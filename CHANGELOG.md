@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.0.0
+
+- Vorabversion (`5.0.0-beta.1`): Unter Windows ohne OpenGL-Treiber (zum Beispiel in virtuellen Maschinen) öffnet sich das Fenster nicht; das Symbol im Infobereich bleibt nutzbar.
+- Neuentwicklung in Go: ein einzelnes Programm ohne Java-Laufzeit, gleiche `collector.xml`, gleiche Platzhalter, gleiches Weiterleitungsformat.
+- Eigenes Fenster mit allen Werten (plattformübergreifend), das Symbol im Infobereich zeigt es wieder an.
+- Container ohne Java (rund 27 MB).
+
 ## 4.0.1
 
 - Die Zeitüberschreitung für Anfragen an den Core ist optional über `<core timeout="5000" />` einstellbar.

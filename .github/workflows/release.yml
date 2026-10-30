@@ -8,7 +8,6 @@ on:
 
 permissions:
   contents: write
-  packages: write
 
 jobs:
   release-source:
@@ -21,181 +20,101 @@ jobs:
       - name: Verify release commit belongs to main
         run: git merge-base --is-ancestor HEAD origin/main
 
-  package:
+  test:
     needs: release-source
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - name: Install window system headers
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y --no-install-recommends libgl1-mesa-dev xorg-dev libwayland-dev libxkbcommon-dev
+      - run: go vet ./...
+      - run: go test -race -timeout 300s ./...
+
+  package:
+    needs: test
     strategy:
       fail-fast: false
       matrix:
         include:
-          - runner: macos-15-intel
-            platform: macos
-            arch: amd64
-            type: dmg
-          - runner: macos-15
-            platform: macos
-            arch: aarch64
-            type: dmg
-          - runner: windows-2025
-            platform: windows
-            arch: amd64
-            type: exe
-          - runner: windows-11-arm
-            platform: windows
-            arch: aarch64
-            type: exe
+          - {runner: macos-15-intel, goos: darwin, goarch: amd64, file: AJCollector-macos-amd64.dmg}
+          - {runner: macos-15, goos: darwin, goarch: arm64, file: AJCollector-macos-aarch64.dmg}
+          - {runner: windows-2025, goos: windows, goarch: amd64, file: AJCollector-windows-amd64.exe}
+          - {runner: windows-11-arm, goos: windows, goarch: arm64, file: AJCollector-windows-aarch64.exe}
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
+      - uses: actions/setup-go@v6
         with:
-          distribution: zulu
-          java-version: '25'
-          cache: maven
-          server-id: github
-          server-username-env-var: GITHUB_ACTOR
-          server-password-env-var: GITHUB_TOKEN
-
-      - uses: actions/setup-python@v7
-        if: matrix.platform == 'windows'
-        with:
-          python-version: '3.x'
-
-      - uses: actions/setup-dotnet@v6
-        if: matrix.platform == 'windows'
-        with:
-          dotnet-version: '8.0.x'
-      - name: Install WiX for jpackage
-        if: matrix.platform == 'windows'
+          go-version-file: go.mod
+      - name: Install Inno Setup
+        if: matrix.goos == 'windows'
         shell: pwsh
-        run: |
-          dotnet tool install --global wix --version 5.0.2
-          "$env:USERPROFILE\.dotnet\tools" >> $env:GITHUB_PATH
-          & "$env:USERPROFILE\.dotnet\tools\wix.exe" extension add --global WixToolset.UI.wixext/5.0.2
-          & "$env:USERPROFILE\.dotnet\tools\wix.exe" extension add --global WixToolset.Util.wixext/5.0.2
-
-      - name: Build JAR and native installer
+        run: choco upgrade innosetup --yes --no-progress
+      - name: Build and package
         shell: bash
         env:
-          GITHUB_TOKEN: ${{ github.token }}
-          PACKAGE_PLATFORM: ${{ matrix.platform }}
-          PACKAGE_ARCH: ${{ matrix.arch }}
-          PACKAGE_TYPE: ${{ matrix.type }}
-        run: |
-          set -euo pipefail
-          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
-            mvn -B versions:set -DnewVersion="${GITHUB_REF_NAME#v}" -DgenerateBackupPoms=false
-          fi
-          mvn -B package
-          version="$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)"
-          mkdir -p target/jpackage-input target/jpackage-output
-          cp target/AJCollector.jar target/jpackage-input/
-          package_name=AJCollector
-          if [[ "$PACKAGE_PLATFORM" == windows ]]; then
-            package_name="appleJuice Collector"
-          fi
-          options=(
-            --type "$PACKAGE_TYPE"
-            --name "$package_name"
-            --app-version "$version"
-            --vendor appleJuiceNETZ
-            --input target/jpackage-input
-            --main-jar AJCollector.jar
-            --main-class de.applejuicenet.collector.Runner
-            --add-modules java.desktop,java.management,java.naming,java.sql,java.xml,jdk.crypto.ec,jdk.unsupported
-            --java-options --enable-native-access=ALL-UNNAMED
-            --dest target/jpackage-output
-          )
-          if [[ "$PACKAGE_PLATFORM" == macos ]]; then
-            options+=(--icon assets/mac/AJCollector.icns --mac-package-identifier de.applejuicenet.collector --resource-dir assets/mac)
-          else
-            python scripts/windows_installer.py --resource-dir target/jpackage-resources
-            options+=(
-              --resource-dir target/jpackage-resources
-              --icon assets/windows/AJCollector.ico
-              --description "appleJuice Collector"
-              --copyright appleJuiceNETZ
-              --about-url https://applejuicenetz.github.io
-              --win-help-url https://applejuicenetz.github.io/faq/
-              --install-dir appleJuiceNETZ/Collector
-              --win-dir-chooser
-              --win-menu
-              --win-menu-group appleJuiceNETZ
-              --win-shortcut
-              --win-upgrade-uuid 6119ffb5-f01b-4162-ab46-a62d5dd16f37
-            )
-          fi
-          jpackage "${options[@]}"
-          mv "target/jpackage-output/${package_name}-${version}.${PACKAGE_TYPE}" "target/AJCollector-${PACKAGE_PLATFORM}-${PACKAGE_ARCH}.${PACKAGE_TYPE}"
-
-      - name: Test Windows installer
-        if: matrix.platform == 'windows'
-        shell: pwsh
-        run: python scripts/test_windows_installer.py target/AJCollector-windows-${{ matrix.arch }}.exe
-
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '0.0.0' }}
+        run: bash packaging/package.sh
       - name: Verify macOS network usage description
-        if: matrix.platform == 'macos'
+        if: matrix.goos == 'darwin'
         shell: bash
         env:
-          PACKAGE_ARCH: ${{ matrix.arch }}
+          FILE: ${{ matrix.file }}
         run: |
           set -euo pipefail
           mountpoint="$(mktemp -d)"
-          hdiutil attach -readonly -nobrowse -mountpoint "$mountpoint" "target/AJCollector-macos-${PACKAGE_ARCH}.dmg"
+          hdiutil attach -readonly -nobrowse -mountpoint "$mountpoint" "dist/assets/$FILE"
           trap 'hdiutil detach "$mountpoint"' EXIT
           plist="$mountpoint/AJCollector.app/Contents/Info.plist"
           plutil -lint "$plist"
           test -n "$(plutil -extract NSLocalNetworkUsageDescription raw -o - "$plist")"
-
+          test -x "$mountpoint/AJCollector.app/Contents/MacOS/AJCollector"
       - uses: actions/upload-artifact@v7
         with:
-          name: native-${{ matrix.platform }}-${{ matrix.arch }}
-          path: target/AJCollector-${{ matrix.platform }}-${{ matrix.arch }}.${{ matrix.type }}
+          name: native-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: dist/assets/${{ matrix.file }}
           if-no-files-found: error
           retention-days: 1
 
   flatpak:
-    needs: release-source
+    needs: test
     strategy:
       fail-fast: false
       matrix:
         include:
-          - runner: ubuntu-24.04
-            arch: x86_64
-            package-arch: amd64
-          - runner: ubuntu-24.04-arm
-            arch: aarch64
-            package-arch: aarch64
+          - {runner: ubuntu-24.04, arch: x86_64, goarch: amd64, package-arch: amd64}
+          - {runner: ubuntu-24.04-arm, arch: aarch64, goarch: arm64, package-arch: aarch64}
     runs-on: ${{ matrix.runner }}
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
+      - uses: actions/setup-go@v6
         with:
-          distribution: zulu
-          java-version: '25'
-          cache: maven
-          server-id: github
-          server-username-env-var: GITHUB_ACTOR
-          server-password-env-var: GITHUB_TOKEN
-      - name: Install Flatpak builder
+          go-version-file: go.mod
+      - name: Install Flatpak builder and window system headers
         run: |
           sudo apt-get update -qq
-          sudo apt-get install -y --no-install-recommends flatpak flatpak-builder
+          sudo apt-get install -y --no-install-recommends flatpak flatpak-builder libgl1-mesa-dev xorg-dev libwayland-dev libxkbcommon-dev
           flatpak remote-add --user --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo
-      - name: Build JAR and Flatpak bundle
+      - name: Build binary and Flatpak bundle
         shell: bash
         env:
-          GITHUB_TOKEN: ${{ github.token }}
+          GOOS: linux
+          GOARCH: ${{ matrix.goarch }}
+          VERSION: ${{ github.ref_type == 'tag' && github.ref_name || '0.0.0' }}
           FLATPAK_ARCH: ${{ matrix.arch }}
           PACKAGE_ARCH: ${{ matrix.package-arch }}
         run: |
           set -euo pipefail
-          if [[ "$GITHUB_REF_TYPE" == tag ]]; then
-            mvn -B versions:set -DnewVersion="${GITHUB_REF_NAME#v}" -DgenerateBackupPoms=false
-          fi
-          mvn -B package
-          version="$(mvn -q help:evaluate -Dexpression=project.version -DforceStdout)"
+          bash packaging/package.sh
           release_date="$(date -u +%F)"
-          sed -i -E "s|<release version=\"[^\"]+\" type=\"stable\" date=\"[^\"]+\"/>|<release version=\"$version\" type=\"stable\" date=\"$release_date\"/>|" \
+          sed -i -E "s|<release version=\"[^\"]+\" type=\"stable\" date=\"[^\"]+\"/>|<release version=\"${VERSION#v}\" type=\"stable\" date=\"$release_date\"/>|" \
             flatpak/collector/io.github.applejuicenetz.collector.metainfo.xml
           flatpak-builder \
             --arch="$FLATPAK_ARCH" \
@@ -203,20 +122,20 @@ jobs:
             --install-deps-from=flathub \
             --disable-rofiles-fuse \
             --force-clean \
-            --repo=target/flatpak-repo \
+            --repo=dist/flatpak-repo \
             --default-branch=stable \
-            target/flatpak-build \
+            dist/flatpak-build \
             flatpak/io.github.applejuicenetz.collector.yaml
           flatpak build-bundle \
             --arch="$FLATPAK_ARCH" \
             --runtime-repo=https://dl.flathub.org/repo/flathub.flatpakrepo \
-            target/flatpak-repo \
-            "target/AJCollector-linux-${PACKAGE_ARCH}.flatpak" \
+            dist/flatpak-repo \
+            "dist/AJCollector-linux-${PACKAGE_ARCH}.flatpak" \
             io.github.applejuicenetz.collector stable
       - uses: actions/upload-artifact@v7
         with:
           name: flatpak-${{ matrix.package-arch }}
-          path: target/AJCollector-linux-${{ matrix.package-arch }}.flatpak
+          path: dist/AJCollector-linux-${{ matrix.package-arch }}.flatpak
           if-no-files-found: error
           retention-days: 1
 
@@ -224,25 +143,16 @@ jobs:
     needs: [package, flatpak]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-java@v6
-        with:
-          distribution: zulu
-          java-version: '25'
-          cache: maven
-          server-id: github
-          server-username-env-var: GITHUB_ACTOR
-          server-password-env-var: GITHUB_TOKEN
       - uses: actions/download-artifact@v8
         with:
           pattern: native-*
           merge-multiple: true
-          path: target
+          path: dist
       - uses: actions/download-artifact@v8
         with:
           pattern: flatpak-*
           merge-multiple: true
-          path: target
+          path: dist
       - name: Check all six packages
         shell: bash
         run: |
@@ -254,40 +164,27 @@ jobs:
             AJCollector-windows-aarch64.exe \
             AJCollector-linux-amd64.flatpak \
             AJCollector-linux-aarch64.flatpak; do
-            test -s "target/$file"
+            test -s "dist/$file"
           done
-      - name: Publish de.applejuicenet.core-information-collector to GitHub Packages
-        if: github.ref_type == 'tag'
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          coordinates="$(mvn -q help:evaluate -Dexpression=project.groupId -DforceStdout):$(mvn -q help:evaluate -Dexpression=project.artifactId -DforceStdout)"
-          if [[ "$coordinates" != de.applejuicenet:core-information-collector ]]; then
-            echo "::error::Unexpected Maven coordinates: $coordinates"
-            exit 1
-          fi
-          mvn -B versions:set -DnewVersion="${GITHUB_REF_NAME#v}" -DgenerateBackupPoms=false
-          mvn -B deploy
       - name: Publish GitHub release
         if: github.ref_type == 'tag'
         uses: softprops/action-gh-release@v3
         with:
           generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
+          make_latest: ${{ !contains(github.ref_name, '-') }}
           body: aktuelles Changelog befindet sich [hier](https://github.com/applejuicenetz/collector/blob/${{ github.ref_name }}/CHANGELOG.md#changelog)
           fail_on_unmatched_files: true
           files: |
-            target/AJCollector.jar
-            target/AJCollector-macos-amd64.dmg
-            target/AJCollector-macos-aarch64.dmg
-            target/AJCollector-windows-amd64.exe
-            target/AJCollector-windows-aarch64.exe
-            target/AJCollector-linux-amd64.flatpak
-            target/AJCollector-linux-aarch64.flatpak
+            dist/AJCollector-macos-amd64.dmg
+            dist/AJCollector-macos-aarch64.dmg
+            dist/AJCollector-windows-amd64.exe
+            dist/AJCollector-windows-aarch64.exe
+            dist/AJCollector-linux-amd64.flatpak
+            dist/AJCollector-linux-aarch64.flatpak
 
   update-main:
-    if: github.ref_type == 'tag'
+    if: github.ref_type == 'tag' && !contains(github.ref_name, '-')
     needs: release
     runs-on: ubuntu-latest
     steps:
@@ -295,45 +192,34 @@ jobs:
         with:
           ref: main
           fetch-depth: 0
-      - uses: actions/setup-java@v6
-        with:
-          distribution: zulu
-          java-version: '25'
-          cache: maven
-          server-id: github
-          server-username-env-var: GITHUB_ACTOR
-          server-password-env-var: GITHUB_TOKEN
       - name: Commit released version to main
         shell: bash
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           version="${GITHUB_REF_NAME#v}"
+          meta=flatpak/collector/io.github.applejuicenetz.collector.metainfo.xml
           if ! git merge-base --is-ancestor "$GITHUB_SHA" HEAD; then
             echo "::warning::Release commit is not on main; skipping version update"
             exit 0
           fi
-          if ! git diff --quiet "$GITHUB_SHA" HEAD -- pom.xml flatpak/collector/io.github.applejuicenetz.collector.metainfo.xml; then
+          if ! git diff --quiet "$GITHUB_SHA" HEAD -- "$meta"; then
             echo "::warning::Release metadata changed on main since this tag; skipping version update"
             exit 0
           fi
-          mvn -B versions:set -DnewVersion="$version" -DgenerateBackupPoms=false
-          sed -i -E "s|<release version=\"[^\"]+\" type=\"stable\" date=\"[^\"]+\"/>|<release version=\"$version\" type=\"stable\" date=\"$(date -u +%F)\"/>|" \
-            flatpak/collector/io.github.applejuicenetz.collector.metainfo.xml
-          if git diff --quiet -- pom.xml flatpak/collector/io.github.applejuicenetz.collector.metainfo.xml; then
+          sed -i -E "s|<release version=\"[^\"]+\" type=\"stable\" date=\"[^\"]+\"/>|<release version=\"$version\" type=\"stable\" date=\"$(date -u +%F)\"/>|" "$meta"
+          if git diff --quiet -- "$meta"; then
             echo "main already contains version $version"
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add pom.xml flatpak/collector/io.github.applejuicenetz.collector.metainfo.xml
+          git add "$meta"
           git commit -m "Release $version"
           git push origin HEAD:main
 
   notify-flatpak:
     needs: release
-    if: github.ref_type == 'tag'
+    if: github.ref_type == 'tag' && !contains(github.ref_name, '-')
     runs-on: ubuntu-latest
     steps:
       - name: Trigger flatpak repository sync

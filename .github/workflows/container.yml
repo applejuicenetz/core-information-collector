@@ -20,13 +20,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-
-      - name: Checkout release source
-        if: inputs.version != ''
-        uses: actions/checkout@v7
         with:
-          ref: refs/tags/${{ inputs.version }}
-          path: .release-source
+          ref: ${{ inputs.version && format('refs/tags/{0}', inputs.version) || github.ref }}
 
       - name: Resolve version
         id: version
@@ -34,36 +29,6 @@ jobs:
         env:
           TAG_NAME: ${{ inputs.version || (github.ref_type == 'tag' && github.ref_name) }}
         run: echo "tag=${TAG_NAME}" >> "$GITHUB_OUTPUT"
-
-      - name: Set up Java
-        uses: actions/setup-java@v6
-        with:
-          distribution: zulu
-          java-version: '25'
-          cache: maven
-          server-id: github
-          server-username-env-var: GITHUB_ACTOR
-          server-password-env-var: GITHUB_TOKEN
-
-      - name: Build JAR
-        shell: bash
-        working-directory: ${{ inputs.version && '.release-source' || '.' }}
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-          TAG_NAME: ${{ steps.version.outputs.tag }}
-        run: |
-          set -euo pipefail
-          if [[ -n "$TAG_NAME" ]]; then
-            mvn -B versions:set -DnewVersion="${TAG_NAME#v}" -DgenerateBackupPoms=false
-          fi
-          mvn -B package
-
-      - name: Copy release JAR into build context
-        if: inputs.version != ''
-        shell: bash
-        run: |
-          mkdir -p target
-          cp .release-source/target/AJCollector.jar target/AJCollector.jar
 
       - name: login to docker.io container registry
         uses: docker/login-action@v4
@@ -102,5 +67,7 @@ jobs:
           platforms: linux/amd64,linux/arm64
           provenance: false
           push: true
+          build-args: |
+            VERSION=${{ steps.version.outputs.tag || 'dev' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
